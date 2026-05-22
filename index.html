@@ -1186,6 +1186,75 @@ footer{
   color:var(--paper);margin-bottom:6px;
 }
 
+/* Cooldown banner */
+.scan-cooldown{
+  margin-top:14px;padding:18px 20px;
+  background:linear-gradient(135deg, rgba(229,169,60,.15), rgba(244,199,106,.08));
+  border:1px solid rgba(244,199,106,.45);
+  border-radius:14px;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  grid-template-rows:auto auto;
+  column-gap:16px;
+  row-gap:10px;
+  align-items:center;
+  position:relative;overflow:hidden;
+}
+.scan-cooldown.ready{
+  background:linear-gradient(135deg, rgba(123,197,142,.15), rgba(123,197,142,.05));
+  border-color:rgba(123,197,142,.55);
+}
+.scan-cooldown.shake{animation:cdShake .45s ease}
+@keyframes cdShake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(4px)}
+}
+.scan-cooldown .cd-icon{
+  font-size:28px;
+  width:48px;height:48px;
+  background:rgba(244,199,106,.2);
+  color:var(--gold-light);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  grid-row:1;
+}
+.scan-cooldown.ready .cd-icon{
+  background:rgba(123,197,142,.25);
+  color:var(--mint);
+}
+.scan-cooldown .cd-body{text-align:left;grid-row:1}
+.scan-cooldown .cd-title{
+  font-family:'Cinzel',serif;
+  font-size:11px;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--gold-light);margin-bottom:4px;
+}
+.scan-cooldown.ready .cd-title{color:var(--mint)}
+.scan-cooldown .cd-sub{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;font-size:15px;
+  color:rgba(255,255,255,.85);
+}
+.scan-cooldown .cd-sub #cd-seconds{
+  font-weight:600;color:var(--gold-light);font-style:normal;
+  font-family:'Inter',sans-serif;
+}
+.scan-cooldown .cd-bar{
+  grid-column:1 / -1;grid-row:2;
+  height:4px;background:rgba(255,255,255,.08);
+  border-radius:4px;overflow:hidden;
+  margin-top:4px;
+}
+.scan-cooldown.ready .cd-bar{display:none}
+.scan-cooldown .cd-bar-fill{
+  height:100%;width:100%;
+  background:linear-gradient(90deg, var(--gold-light), var(--gold));
+  transition:width .5s linear;
+  border-radius:4px;
+}
+
 .mvt-list{display:flex;flex-direction:column;gap:10px}
 .mvt-item{
   display:flex;justify-content:space-between;align-items:center;
@@ -2786,6 +2855,9 @@ function showDashboard(){
 
 let scanner = null;
 let lastScan = {code:null, ts:0};
+let scanCooldownUntil = 0;
+let scanCooldownTimer = null;
+const SCAN_COOLDOWN_MS = 60000; // 60 secondes entre deux scans réussis
 
 function showTab(tab, btn){
   document.querySelectorAll('.org-tab').forEach(t=>t.classList.remove('active'));
@@ -2932,10 +3004,18 @@ function stopScanner(){
   if(scanner){
     scanner.stop().then(()=>{scanner.clear();scanner=null}).catch(()=>{scanner=null});
   }
+  // On laisse le compteur tourner s'il est actif (info utile en revenant sur l'onglet)
 }
 
 async function onScanSuccess(decodedText){
   const now = Date.now();
+
+  // Cooldown global après dernier scan réussi
+  if(now < scanCooldownUntil){
+    flashCooldownBanner();
+    return;
+  }
+  // Anti-double-lecture rapprochée du même code (protection caméra)
   if(decodedText === lastScan.code && (now - lastScan.ts) < 3000) return;
   lastScan = {code:decodedText, ts:now};
 
@@ -2965,8 +3045,51 @@ async function onScanSuccess(decodedText){
       <p><strong>${escapeHtml(guest.nom)}</strong></p>
       <p style="font-size:13px;margin-top:6px;opacity:.7">${new Date().toLocaleTimeString('fr-FR')}</p>
     </div>
+    <div class="scan-cooldown" id="scan-cooldown">
+      <div class="cd-icon">⏱</div>
+      <div class="cd-body">
+        <div class="cd-title">Délai de sécurité activé</div>
+        <div class="cd-sub">Prochain scan possible dans <span id="cd-seconds">60</span> s</div>
+      </div>
+      <div class="cd-bar"><div class="cd-bar-fill" id="cd-bar-fill"></div></div>
+    </div>
   `;
+  startScanCooldown();
   loadDashboard();
+}
+
+function startScanCooldown(){
+  scanCooldownUntil = Date.now() + SCAN_COOLDOWN_MS;
+  if(scanCooldownTimer) clearInterval(scanCooldownTimer);
+  scanCooldownTimer = setInterval(()=>{
+    const remaining = scanCooldownUntil - Date.now();
+    const sec = Math.max(0, Math.ceil(remaining/1000));
+    const secEl = document.getElementById('cd-seconds');
+    const barEl = document.getElementById('cd-bar-fill');
+    if(secEl) secEl.textContent = sec;
+    if(barEl){
+      const pct = Math.max(0, (remaining/SCAN_COOLDOWN_MS)*100);
+      barEl.style.width = pct+'%';
+    }
+    if(remaining <= 0){
+      clearInterval(scanCooldownTimer);
+      scanCooldownTimer = null;
+      const cd = document.getElementById('scan-cooldown');
+      if(cd){
+        cd.classList.add('ready');
+        cd.innerHTML = `<div class="cd-icon">✓</div>
+          <div class="cd-body"><div class="cd-title">Prêt à scanner</div>
+          <div class="cd-sub">Vous pouvez scanner le prochain QR code</div></div>`;
+      }
+    }
+  }, 500);
+}
+
+function flashCooldownBanner(){
+  const cd = document.getElementById('scan-cooldown');
+  if(!cd) return;
+  cd.classList.add('shake');
+  setTimeout(()=>cd.classList.remove('shake'), 500);
 }
 
 async function loadMouvements(){
