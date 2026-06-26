@@ -489,6 +489,30 @@ section.page-section{padding:90px 24px}
 }
 .intro-text p:first-of-type{font-size:24px;font-style:italic;color:var(--peacock)}
 .intro-text strong{color:var(--jade);font-weight:600;font-style:normal}
+.contrib-block{margin-top:56px;text-align:center}
+.contrib-list{
+  list-style:none;
+  max-width:480px;margin:24px auto 0;padding:0;
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:14px 16px;justify-items:center;
+}
+.contrib-list li{
+  font-family:'Cormorant Garamond',serif;
+  font-size:20px;font-weight:300;line-height:1.4;
+  color:var(--ink);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  text-align:center;
+}
+.contrib-list li::before{
+  content:'';
+  width:7px;height:7px;border-radius:50%;
+  background:var(--jade);
+  flex:none;
+}
+@media (max-width:480px){
+  .contrib-list{gap:18px 8px}
+  .contrib-list li{font-size:17px}
+}
 
 /* ===============================================================
    COUPLE NAMES — ornamental divider section
@@ -1634,7 +1658,7 @@ body.splash-on{overflow:hidden;height:100vh}
         <p class="rsvp-msg">Pour confirmer définitivement votre présence, prenez un selfie qui sera affiché sur votre carte d'invitation.</p>
         <div class="rsvp-deadline">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          <span>Merci de confirmer <strong>avant le 30 juin 2026</strong></span>
+          <span>Merci de confirmer <strong>avant le 10 juillet 2026</strong></span>
         </div>
         <div class="selfie-wrap">
           <video id="video" autoplay playsinline muted style="display:none"></video>
@@ -1709,8 +1733,18 @@ body.splash-on{overflow:hidden;height:100vh}
       <div class="intro-grid reveal">
         <div class="intro-text">
           <p>Vous êtes cordialement invités à célébrer avec nous l'union de nos vies, en présence de Dieu, de nos familles et de nos amis les plus chers.</p>
-          <p>Votre présence sera notre plus beau cadeau. Si vous souhaitez tout de même contribuer financièrement, cela se fera <strong>uniquement par Virement Bancaire, Wave ou Orange Money</strong>.</p>
         </div>
+      </div>
+      <div class="contrib-block reveal">
+        <h2 class="section-h2">Contribution</h2>
+        <div class="intro-text">
+          <p>Votre présence sera notre plus beau cadeau. Toutefois, si vous souhaitez nous faire un don pour nous accompagner dans cette magnifique aventure, cela se fera uniquement par :</p>
+        </div>
+        <ol class="contrib-list">
+          <li>Wave</li>
+          <li>Orange Money</li>
+          <li>Virement bancaire</li>
+        </ol>
       </div>
     </div>
   </section>
@@ -2536,14 +2570,17 @@ async function downloadPDF(){
       doc.setFillColor(...CREAM);
       doc.roundedRect(RX - qrSize/2 - 1.5, qrY - 1.5, qrSize+3, qrSize+3, 1, 1, 'F');
       doc.addImage(qrDataUrl,'PNG', RX - qrSize/2, qrY, qrSize, qrSize);
-    }catch(e){console.warn('QR failed', e)}
+    }catch(e){
+      console.warn('[PDF] QR failed', e);
+      toast('QR code indisponible (réseau ?). Voir console F12.');
+    }
 
     // ===== Notice cadeau =====
     const ny = qrY + qrSize + 3;
     doc.setFont('times','italic');
     doc.setFontSize(5.2);
     doc.setTextColor(...GOLD_LIGHT);
-    const giftMsg = "Votre présence sera notre plus beau cadeau. Si vous souhaitez tout de même contribuer financièrement, cela se fera uniquement par Virement Bancaire, Wave ou Orange Money.";
+    const giftMsg = "Votre présence sera notre plus beau cadeau. Toutefois, si vous souhaitez nous faire un don pour nous accompagner dans cette magnifique aventure, cela se fera uniquement par : 1) Wave  2) Orange Money  3) Virement bancaire.";
     const giftLines = doc.splitTextToSize(giftMsg, 92);
     giftLines.forEach((line, i) => {
       doc.text(line, RX, ny + i*2.4, {align:'center'});
@@ -2863,18 +2900,17 @@ function roundedRectPath(ctx, x, y, w, h, r){
   ctx.closePath();
 }
 
-function fetchQRAsDataUrl(code){
-  return new Promise((resolve,reject)=>{
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = ()=>{
-      const c = document.createElement('canvas');
-      c.width = img.width; c.height = img.height;
-      c.getContext('2d').drawImage(img,0,0);
-      resolve(c.toDataURL('image/png'));
-    };
-    img.onerror = reject;
-    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(code)}&color=0A2540&bgcolor=FAF8F2&format=png&margin=2`;
+async function fetchQRAsDataUrl(code){
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(code)}&color=0A2540&bgcolor=FAF8F2&format=png&margin=2`;
+  // Fetch + blob → data URL (évite le canvas "tainted" si l'image n'a pas d'en-têtes CORS exploitables par <img crossOrigin>)
+  const res = await fetch(qrUrl, {mode:'cors', cache:'no-cache'});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  const blob = await res.blob();
+  return await new Promise((resolve,reject)=>{
+    const fr = new FileReader();
+    fr.onload = ()=>resolve(fr.result);
+    fr.onerror = reject;
+    fr.readAsDataURL(blob);
   });
 }
 
