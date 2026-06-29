@@ -478,9 +478,36 @@ section.page-section{padding:90px 24px}
 }
 
 /* ===============================================================
+   MOTIFS DÉCORATIFS ANIMÉS (anneaux, cœurs, colombes, coupes, fleurs)
+   =============================================================== */
+.motif-layer{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:-1}
+.motif-ic{position:absolute;opacity:.75;will-change:translate,rotate}
+.motif-ic.m-bob{animation:motifBob 6.5s ease-in-out infinite}
+.motif-ic.m-sway{animation:motifBob 7.5s ease-in-out infinite,motifSway 5s ease-in-out infinite}
+.motif-ic.m-spin{animation:motifBob 8s ease-in-out infinite,motifSpin 26s linear infinite}
+@keyframes motifBob{
+  0%,100%{translate:0 0}
+  50%{translate:0 -16px}
+}
+@keyframes motifSway{
+  0%,100%{rotate:-6deg}
+  50%{rotate:6deg}
+}
+@keyframes motifSpin{
+  from{rotate:0deg}
+  to{rotate:360deg}
+}
+@media (max-width:680px){
+  .motif-ic{transform:scale(.72)}
+}
+
+/* ===============================================================
    INTRO
    =============================================================== */
-.intro{background:var(--paper)}
+.intro{
+  background:var(--paper);
+  position:relative;z-index:0;overflow:hidden;
+}
 .intro-grid{display:grid;grid-template-columns:1fr;gap:48px;align-items:center;max-width:880px;margin:0 auto}
 .intro-text p{
   font-family:'Cormorant Garamond',serif;
@@ -521,7 +548,7 @@ section.page-section{padding:90px 24px}
   padding:80px 24px;
   text-align:center;
   background:var(--cream);
-  position:relative;
+  position:relative;z-index:0;overflow:hidden;
 }
 .couple-names{
   display:flex;align-items:center;justify-content:center;gap:24px;
@@ -550,7 +577,10 @@ section.page-section{padding:90px 24px}
 /* ===============================================================
    PROGRAMME
    =============================================================== */
-.programme{background:var(--paper)}
+.programme{
+  background:var(--paper);
+  position:relative;z-index:0;overflow:hidden;
+}
 .timeline{
   display:grid;grid-template-columns:1fr;gap:18px;
   max-width:720px;margin:0 auto;
@@ -608,7 +638,10 @@ section.page-section{padding:90px 24px}
 /* ===============================================================
    LIEU
    =============================================================== */
-.lieu{background:var(--cream)}
+.lieu{
+  background:var(--cream);
+  position:relative;z-index:0;overflow:hidden;
+}
 .lieu-card{
   max-width:880px;margin:0 auto;
   background:var(--paper);
@@ -662,7 +695,10 @@ section.page-section{padding:90px 24px}
 /* ===============================================================
    BAR
    =============================================================== */
-.bar{background:var(--paper)}
+.bar{
+  background:var(--paper);
+  position:relative;z-index:0;overflow:hidden;
+}
 .bar-pills{
   display:flex;flex-wrap:wrap;gap:12px;
   justify-content:center;
@@ -688,7 +724,10 @@ section.page-section{padding:90px 24px}
 /* ===============================================================
    LIVRE D'OR
    =============================================================== */
-.livre{background:var(--cream)}
+.livre{
+  background:var(--cream);
+  position:relative;z-index:0;overflow:hidden;
+}
 .livre-form{
   max-width:580px;margin:0 auto 48px;
   background:var(--paper);
@@ -790,7 +829,7 @@ section.page-section{padding:90px 24px}
 /* ===============================================================
    RSVP
    =============================================================== */
-.rsvp{background:var(--grad-peacock);color:var(--paper);position:relative;overflow:hidden}
+.rsvp{background:var(--grad-peacock);color:var(--paper);position:relative;z-index:0;overflow:hidden}
 .rsvp::before{
   content:"";position:absolute;inset:0;
   background:radial-gradient(ellipse at 30% 20%,rgba(91,175,224,.18),transparent 50%),
@@ -1206,6 +1245,40 @@ footer{
   font-size:14px;color:rgba(255,255,255,.92);
 }
 .guests-table tr:hover td{background:rgba(255,255,255,.02)}
+
+.search-bar{display:flex}
+.search-bar input{
+  flex:1;min-width:240px;
+  padding:14px 18px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:60px;
+  color:var(--paper);
+  font-size:14px;
+}
+.search-bar input:focus{outline:none;border-color:var(--gold)}
+.search-bar input::placeholder{color:rgba(255,255,255,.4)}
+
+.table-group-card{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(244,199,106,.18);
+  border-radius:var(--radius);
+  padding:20px 24px;margin-bottom:16px;
+}
+.table-group-title{
+  font-family:'Cinzel',serif;font-size:12px;letter-spacing:.18em;
+  color:var(--gold-light);margin-bottom:12px;
+  display:flex;align-items:center;gap:10px;
+}
+.table-group-count{
+  background:rgba(244,199,106,.18);color:var(--gold-light);
+  border-radius:20px;padding:2px 10px;font-size:11px;
+}
+.table-group-list{list-style:none;display:flex;flex-wrap:wrap;gap:8px 16px}
+.table-group-list li{
+  font-size:14px;color:rgba(255,255,255,.9);
+  padding:4px 0;
+}
 
 .badge{
   display:inline-block;padding:4px 12px;border-radius:20px;
@@ -1638,6 +1711,10 @@ body.splash-on{overflow:hidden;height:100vh}
 
   <!-- RSVP -->
   <section class="rsvp page-section" id="rsvp-section">
+    <div class="motif-layer">
+      <svg class="motif-ic m-spin" viewBox="0 0 64 64" width="95" height="95" style="top:9%;left:6%;color:var(--gold-light);opacity:.55" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="24" cy="36" r="14"/><circle cx="40" cy="36" r="14"/></svg>
+      <svg class="motif-ic m-sway" viewBox="0 0 64 64" width="68" height="68" style="bottom:12%;right:9%;color:var(--gold-light);opacity:.55;animation-delay:.6s" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M32 54C18 44 8 35 8 23.5 8 15 14.5 9 22 9c5 0 8.5 3 10 6 1.5-3 5-6 10-6 7.5 0 14 6 14 14.5C56 35 46 44 32 54Z"/></svg>
+    </div>
     <div class="container">
       <div class="section-title reveal">
         <div class="section-eyebrow">Confirmation</div>
@@ -1714,6 +1791,11 @@ body.splash-on{overflow:hidden;height:100vh}
 
   <!-- COUPLE DIVIDER -->
   <section class="couple-divider">
+    <div class="motif-layer">
+      <svg class="motif-ic m-spin" viewBox="0 0 64 64" width="106" height="106" style="top:10%;left:8%;color:var(--gold)" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="24" cy="36" r="14"/><circle cx="40" cy="36" r="14"/></svg>
+      <svg class="motif-ic m-sway" viewBox="0 0 64 64" width="76" height="76" style="bottom:14%;right:10%;color:var(--jade)" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M32 54C18 44 8 35 8 23.5 8 15 14.5 9 22 9c5 0 8.5 3 10 6 1.5-3 5-6 10-6 7.5 0 14 6 14 14.5C56 35 46 44 32 54Z"/></svg>
+      <svg class="motif-ic m-bob" viewBox="0 0 32 32" width="49" height="49" style="top:18%;right:16%;color:var(--peacock);animation-delay:.6s" fill="none" stroke="currentColor" stroke-width="1.95"><circle cx="16" cy="10" r="5"/><circle cx="16" cy="22" r="5"/><circle cx="10" cy="16" r="5"/><circle cx="22" cy="16" r="5"/><circle cx="16" cy="16" r="3" fill="currentColor" stroke="none"/></svg>
+    </div>
     <div class="couple-names reveal">
       <span class="name">Maeva</span>
       <span class="amp">&amp;</span>
@@ -1725,6 +1807,10 @@ body.splash-on{overflow:hidden;height:100vh}
 
   <!-- INTRO -->
   <section class="intro page-section">
+    <div class="motif-layer">
+      <svg class="motif-ic m-sway" viewBox="0 0 32 32" width="57" height="57" style="top:8%;right:7%;color:var(--sky)" fill="none" stroke="currentColor" stroke-width="1.95"><circle cx="16" cy="10" r="5"/><circle cx="16" cy="22" r="5"/><circle cx="10" cy="16" r="5"/><circle cx="22" cy="16" r="5"/><circle cx="16" cy="16" r="3" fill="currentColor" stroke="none"/></svg>
+      <svg class="motif-ic m-bob" viewBox="0 0 64 64" width="65" height="65" style="bottom:10%;left:6%;color:var(--gold);animation-delay:.8s" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M32 54C18 44 8 35 8 23.5 8 15 14.5 9 22 9c5 0 8.5 3 10 6 1.5-3 5-6 10-6 7.5 0 14 6 14 14.5C56 35 46 44 32 54Z"/></svg>
+    </div>
     <div class="container">
       <div class="section-title reveal">
         <div class="section-eyebrow">Bienvenue</div>
@@ -1751,6 +1837,10 @@ body.splash-on{overflow:hidden;height:100vh}
 
   <!-- PROGRAMME -->
   <section class="programme page-section" id="programme">
+    <div class="motif-layer">
+      <svg class="motif-ic m-bob" viewBox="0 0 64 64" width="84" height="84" style="top:9%;left:7%;color:var(--jade)" fill="none" stroke="currentColor" stroke-width="2.08" stroke-linecap="round" stroke-linejoin="round"><path d="M8 38c6-2 10-8 12-14 2 5 2 11-1 16 6-1 12-5 15-11 1 6-1 13-7 17 5 2 11 1 15-2-3 6-10 10-17 10-9 0-16-6-17-16Z"/><circle cx="14" cy="30" r="1.4" fill="currentColor" stroke="none"/></svg>
+      <svg class="motif-ic m-sway" viewBox="0 0 32 32" width="46" height="46" style="bottom:8%;right:8%;color:var(--gold);animation-delay:1s" fill="none" stroke="currentColor" stroke-width="1.95"><circle cx="16" cy="10" r="5"/><circle cx="16" cy="22" r="5"/><circle cx="10" cy="16" r="5"/><circle cx="22" cy="16" r="5"/><circle cx="16" cy="16" r="3" fill="currentColor" stroke="none"/></svg>
+    </div>
     <div class="container">
       <div class="section-title reveal">
         <div class="section-eyebrow">Déroulement</div>
@@ -1804,6 +1894,10 @@ body.splash-on{overflow:hidden;height:100vh}
 
   <!-- BAR -->
   <section class="bar page-section">
+    <div class="motif-layer">
+      <svg class="motif-ic m-bob" viewBox="0 0 64 64" width="68" height="76" style="top:8%;right:9%;color:var(--gold)" fill="none" stroke="currentColor" stroke-width="2.08" stroke-linecap="round"><path d="M20 6h10l-2 18c-.3 4-2.5 6-3 6s-2.7-2-3-6L20 6Z"/><line x1="25" y1="30" x2="25" y2="52"/><line x1="18" y1="52" x2="32" y2="52"/><path d="M40 10h8l-1.4 14c-.2 3-2 4.4-2.6 4.4s-2.4-1.4-2.6-4.4L40 10Z"/><line x1="44" y1="28.4" x2="44" y2="46"/><line x1="39" y1="46" x2="49" y2="46"/></svg>
+      <svg class="motif-ic m-sway" viewBox="0 0 32 32" width="49" height="49" style="bottom:10%;left:7%;color:var(--jade);animation-delay:.5s" fill="none" stroke="currentColor" stroke-width="1.95"><circle cx="16" cy="10" r="5"/><circle cx="16" cy="22" r="5"/><circle cx="10" cy="16" r="5"/><circle cx="22" cy="16" r="5"/><circle cx="16" cy="16" r="3" fill="currentColor" stroke="none"/></svg>
+    </div>
     <div class="container">
       <div class="section-title reveal">
         <div class="section-eyebrow">À votre santé</div>
@@ -1824,6 +1918,10 @@ body.splash-on{overflow:hidden;height:100vh}
 
   <!-- LIEU -->
   <section class="lieu page-section" id="lieu">
+    <div class="motif-layer">
+      <svg class="motif-ic m-sway" viewBox="0 0 64 64" width="72" height="72" style="top:7%;right:8%;color:var(--peacock)" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M32 54C18 44 8 35 8 23.5 8 15 14.5 9 22 9c5 0 8.5 3 10 6 1.5-3 5-6 10-6 7.5 0 14 6 14 14.5C56 35 46 44 32 54Z"/></svg>
+      <svg class="motif-ic m-spin" viewBox="0 0 64 64" width="76" height="76" style="bottom:9%;left:6%;color:var(--gold);animation-delay:.4s" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="24" cy="36" r="14"/><circle cx="40" cy="36" r="14"/></svg>
+    </div>
     <div class="container">
       <div class="section-title reveal">
         <div class="section-eyebrow">Adresse</div>
@@ -1849,6 +1947,10 @@ body.splash-on{overflow:hidden;height:100vh}
 
   <!-- LIVRE D'OR -->
   <section class="livre page-section" id="livre">
+    <div class="motif-layer">
+      <svg class="motif-ic m-bob" viewBox="0 0 64 64" width="80" height="80" style="top:8%;right:7%;color:var(--gold)" fill="none" stroke="currentColor" stroke-width="2.08" stroke-linecap="round" stroke-linejoin="round"><path d="M8 38c6-2 10-8 12-14 2 5 2 11-1 16 6-1 12-5 15-11 1 6-1 13-7 17 5 2 11 1 15-2-3 6-10 10-17 10-9 0-16-6-17-16Z"/><circle cx="14" cy="30" r="1.4" fill="currentColor" stroke="none"/></svg>
+      <svg class="motif-ic m-sway" viewBox="0 0 64 64" width="65" height="65" style="bottom:10%;left:7%;color:var(--jade);animation-delay:.7s" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M32 54C18 44 8 35 8 23.5 8 15 14.5 9 22 9c5 0 8.5 3 10 6 1.5-3 5-6 10-6 7.5 0 14 6 14 14.5C56 35 46 44 32 54Z"/></svg>
+    </div>
     <div class="container">
       <div class="section-title reveal">
         <div class="section-eyebrow">Livre d'or</div>
@@ -1919,6 +2021,7 @@ body.splash-on{overflow:hidden;height:100vh}
 
     <div class="org-tabs">
       <button class="org-tab active" onclick="showTab('invites', this)">Invités</button>
+      <button class="org-tab" onclick="showTab('tables', this)">Tables</button>
       <button class="org-tab" onclick="showTab('scanner', this)">Scanner QR</button>
       <button class="org-tab" onclick="showTab('mouvements', this)">Mouvements</button>
       <button class="org-tab" onclick="showTab('parametres', this)">Paramètres</button>
@@ -1928,17 +2031,29 @@ body.splash-on{overflow:hidden;height:100vh}
       <h3>Liste des invités</h3>
       <div class="add-guest-form">
         <input id="new-guest-name" type="text" placeholder="Nom complet de l'invité">
+        <input id="new-guest-table" type="text" placeholder="Table (ex: Table 5)">
         <button class="btn-primary" onclick="addGuest()">+ Ajouter &amp; générer lien</button>
       </div>
       <div id="new-link-result" class="hidden"></div>
-      <div style="overflow-x:auto;margin-top:24px">
+      <div class="search-bar" style="margin-top:24px">
+        <input id="guests-search" type="text" placeholder="Rechercher par nom ou par table…" oninput="filterGuests()">
+      </div>
+      <div style="overflow-x:auto;margin-top:16px">
         <table class="guests-table">
           <thead><tr>
-            <th>Nom</th><th>Code</th><th>Statut</th><th>Présence</th><th>Actions</th>
+            <th>Nom</th><th>Table</th><th>Code</th><th>Statut</th><th>Présence</th><th>Actions</th>
           </tr></thead>
           <tbody id="guests-tbody"></tbody>
         </table>
       </div>
+    </div>
+
+    <div id="tab-tables" class="org-panel hidden">
+      <h3>Invités par table</h3>
+      <div class="search-bar">
+        <input id="tables-search" type="text" placeholder="Rechercher une table (ex: Table 5)…" oninput="renderTablesView()">
+      </div>
+      <div id="tables-grouped" style="margin-top:20px"></div>
     </div>
 
     <div id="tab-scanner" class="org-panel hidden">
@@ -3002,11 +3117,12 @@ const SCAN_COOLDOWN_MS = 60000; // 60 secondes entre deux scans réussis
 function showTab(tab, btn){
   document.querySelectorAll('.org-tab').forEach(t=>t.classList.remove('active'));
   if(btn) btn.classList.add('active');
-  ['invites','scanner','mouvements','parametres'].forEach(t=>hide('tab-'+t));
+  ['invites','tables','scanner','mouvements','parametres'].forEach(t=>hide('tab-'+t));
   show('tab-'+tab);
   if(tab==='scanner') initScanner();
   else stopScanner();
   if(tab==='mouvements') loadMouvements();
+  if(tab==='tables') renderTablesView();
   if(tab==='parametres'){
     // Reset form fields when entering settings
     ['cp-old','cp-new','cp-confirm'].forEach(id=>{ const el=$(id); if(el) el.value=''; });
@@ -3014,16 +3130,22 @@ function showTab(tab, btn){
   }
 }
 
+let allInvites = [];
+
 async function loadDashboard(){
   const invites = await sbSelect('invites','select=*&order=created_at.desc');
+  allInvites = invites;
   $('st-total').textContent = invites.length;
   $('st-confirmed').textContent = invites.filter(i=>i.statut==='confirme').length;
   $('st-pending').textContent = invites.filter(i=>i.statut==='en_attente').length;
   $('st-entered').textContent = invites.filter(i=>i.presence==='entre').length;
+  renderGuestsTable(invites);
+}
 
+function renderGuestsTable(invites){
   const tbody = $('guests-tbody');
   if(invites.length===0){
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:rgba(255,255,255,.5);font-style:italic;padding:30px">Aucun invité pour le moment.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,.5);font-style:italic;padding:30px">Aucun invité pour le moment.</td></tr>';
     return;
   }
   tbody.innerHTML = invites.map(i=>{
@@ -3037,6 +3159,7 @@ async function loadDashboard(){
     return `
       <tr>
         <td><strong>${escapeHtml(i.nom||'')}</strong></td>
+        <td>${escapeHtml(i.table_nom||'—')}</td>
         <td><code style="font-size:12px;color:var(--gold-light)">${escapeHtml(i.code||'—')}</code></td>
         <td>${statutBadge}</td>
         <td>${presBadge}</td>
@@ -3050,8 +3173,54 @@ async function loadDashboard(){
   }).join('');
 }
 
+function filterGuests(){
+  const q = ($('guests-search').value || '').trim().toLowerCase();
+  if(!q){ renderGuestsTable(allInvites); return; }
+  const filtered = allInvites.filter(i=>
+    (i.nom||'').toLowerCase().includes(q) ||
+    (i.table_nom||'').toLowerCase().includes(q)
+  );
+  renderGuestsTable(filtered);
+}
+
+function renderTablesView(){
+  const wrap = $('tables-grouped');
+  if(!wrap) return;
+  const q = ($('tables-search')?.value || '').trim().toLowerCase();
+
+  // Regroupement insensible à la casse (clé normalisée en minuscules)
+  const groups = {};
+  allInvites.forEach(i=>{
+    const label = (i.table_nom||'').trim();
+    const key = label ? label.toLowerCase() : '__sans_table__';
+    if(!groups[key]) groups[key] = { label: label || 'Sans table assignée', guests: [] };
+    groups[key].guests.push(i);
+  });
+
+  let entries = Object.values(groups);
+  if(q){
+    entries = entries.filter(g => g.label.toLowerCase().includes(q));
+  }
+  entries.sort((a,b)=> a.label.localeCompare(b.label, 'fr', {numeric:true}));
+
+  if(entries.length===0){
+    wrap.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,.5);font-style:italic;padding:30px">Aucune table trouvée.</p>';
+    return;
+  }
+
+  wrap.innerHTML = entries.map(g => `
+    <div class="table-group-card">
+      <div class="table-group-title">${escapeHtml(g.label)} <span class="table-group-count">${g.guests.length}</span></div>
+      <ul class="table-group-list">
+        ${g.guests.map(gu => `<li>${escapeHtml(gu.nom||'')}</li>`).join('')}
+      </ul>
+    </div>
+  `).join('');
+}
+
 async function addGuest(){
   const name = $('new-guest-name').value.trim();
+  const tableNom = ($('new-guest-table')?.value || '').trim();
   if(!name){ toast('Saisir un nom'); return; }
   const id = generateId();
   // Auto-retry en cas de collision (extrêmement rare mais blindage 500+ invités)
@@ -3065,6 +3234,7 @@ async function addGuest(){
         headers:{...SB_HEADERS,'Prefer':'return=minimal'},
         body:JSON.stringify({
           id, code, nom:name,
+          table_nom: tableNom || null,
           statut:'en_attente',
           scanned:false,
           created_at:new Date().toISOString()
@@ -3101,6 +3271,7 @@ async function addGuest(){
       </div>
     `;
     $('new-guest-name').value = '';
+    $('new-guest-table').value = '';
     toast('Invité ajouté avec succès');
     loadDashboard();
   } catch(e){
