@@ -850,6 +850,36 @@ section.page-section{padding:90px 24px}
   padding:40px 32px;
   text-align:center;
 }
+
+/* Confirmation obligatoire dès l'ouverture du lien */
+#rsvp-gate-backdrop{
+  position:fixed;inset:0;z-index:590;
+  background:var(--peacock);
+}
+body.gate-open{overflow:hidden}
+body.gate-open .nav{display:none}
+.rsvp-gate{
+  position:fixed !important;
+  inset:0;
+  z-index:600;
+  width:100%;
+  max-width:none;
+  margin:0;
+  border-radius:0;
+  overflow-y:auto;
+  background:var(--peacock);
+  padding:110px 24px 60px;
+  display:flex !important;
+  flex-direction:column;
+  align-items:center;
+}
+.rsvp-gate .guest-name-display,
+.rsvp-gate .rsvp-msg,
+.rsvp-gate .selfie-wrap,
+.rsvp-gate #rsvp-feedback{
+  width:100%;
+  max-width:460px;
+}
 .guest-name-display{margin-bottom:24px}
 .guest-name-display .label{
   font-family:'Cinzel',serif;
@@ -866,19 +896,6 @@ section.page-section{padding:90px 24px}
   font-size:18px;color:rgba(255,255,255,.85);
   margin-bottom:28px;line-height:1.55;
 }
-.rsvp-deadline{
-  display:inline-flex;align-items:center;gap:10px;
-  margin:0 auto 24px;
-  padding:10px 20px;
-  background:rgba(229,169,60,.12);
-  border:1px solid rgba(244,199,106,.45);
-  border-radius:60px;
-  color:var(--gold-light);
-  font-family:'Cinzel',serif;
-  font-size:10px;letter-spacing:.18em;
-  text-transform:uppercase;
-}
-.rsvp-deadline strong{color:var(--paper);font-weight:600;letter-spacing:.1em}
 .selfie-wrap{margin:24px 0}
 #video,#canvas-preview{
   max-width:320px;width:100%;
@@ -1675,6 +1692,7 @@ body.splash-on{overflow:hidden;height:100vh}
 
 <!-- ============== PUBLIC SITE ============== -->
 <div id="public-site">
+  <div id="rsvp-gate-backdrop" class="hidden"></div>
 
   <!-- HERO -->
   <section class="hero" id="hero">
@@ -1733,10 +1751,6 @@ body.splash-on{overflow:hidden;height:100vh}
           <div class="name" id="pending-name">—</div>
         </div>
         <p class="rsvp-msg">Pour confirmer définitivement votre présence, prenez un selfie qui sera affiché sur votre carte d'invitation.</p>
-        <div class="rsvp-deadline">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          <span>Merci de confirmer <strong>avant le 10 juillet 2026</strong></span>
-        </div>
         <div class="selfie-wrap">
           <video id="video" autoplay playsinline muted style="display:none"></video>
           <canvas id="canvas-preview" style="display:none"></canvas>
@@ -2098,30 +2112,57 @@ body.splash-on{overflow:hidden;height:100vh}
 
 <script>
 
+/* ============== STORAGE SÉCURISÉ ==============
+   sessionStorage peut être bloqué par le navigateur (fichiers locaux file://,
+   navigation privée, politiques d'entreprise). On isole tous les accès pour
+   qu'une erreur de stockage ne bloque jamais le reste du site (ex: écran de
+   présentation qui resterait figé indéfiniment). */
+function safeSessionGet(key){
+  try{ return sessionStorage.getItem(key); }catch(e){ return null; }
+}
+function safeSessionSet(key,val){
+  try{ sessionStorage.setItem(key,val); }catch(e){}
+}
+function safeSessionRemove(key){
+  try{ sessionStorage.removeItem(key); }catch(e){}
+}
+
 /* ============== SPLASH INTRO ============== */
+// Filet de sécurité : quoi qu'il arrive, l'écran de présentation disparaît
+// après 8s. Il ne doit jamais rester bloqué à l'écran.
+setTimeout(function(){
+  const s = document.getElementById('splash');
+  if(s && !s.classList.contains('gone')) s.remove();
+}, 8000);
+
 (function initSplash(){
   const splash = document.getElementById('splash');
   if(!splash) return;
-  // Skip splash on organizer screen
-  if(new URLSearchParams(window.location.search).get('organisateur') === '1'){
+  try{
+    // Skip splash on organizer screen
+    if(new URLSearchParams(window.location.search).get('organisateur') === '1'){
+      splash.remove();
+      return;
+    }
+    // Show only once per session
+    if(safeSessionGet('splash_shown') === '1'){
+      splash.remove();
+      return;
+    }
+    document.body.classList.add('splash-on');
+    // Auto-dismiss after ~4.6s (after all animations complete)
+    setTimeout(dismissSplash, 4600);
+  } catch(e){
+    console.warn('[SPLASH] erreur, affichage direct du site', e);
     splash.remove();
-    return;
   }
-  // Show only once per session
-  if(sessionStorage.getItem('splash_shown') === '1'){
-    splash.remove();
-    return;
-  }
-  document.body.classList.add('splash-on');
-  // Auto-dismiss after ~4.6s (after all animations complete)
-  setTimeout(dismissSplash, 4600);
 })();
 
 function dismissSplash(){
   const splash = document.getElementById('splash');
   if(!splash) return;
   splash.classList.add('gone');
-  sessionStorage.setItem('splash_shown','1');
+  safeSessionSet('splash_shown','1');
   setTimeout(()=>{
     splash.remove();
     document.body.classList.remove('splash-on');
@@ -2261,7 +2302,7 @@ if(isOrganizer){
   hide('public-site');
   document.getElementById('nav').style.display='none';
   show('org-screen');
-  if(sessionStorage.getItem('org_authed') === '1'){
+  if(safeSessionGet('org_authed') === '1'){
     showDashboard();
   }
 } else {
@@ -2310,6 +2351,15 @@ async function loadInvite(code){
 function showPendingView(){
   hide('rsvp-confirmed');hide('rsvp-declined');hide('rsvp-nocode');
   show('rsvp-pending');
+  const pendingEl = $('rsvp-pending');
+  pendingEl.classList.add('rsvp-gate');
+  // #rsvp-section a son propre position:relative;z-index:0, ce qui crée un
+  // contexte d'empilement séparé et piège le z-index du gate à l'intérieur.
+  // On déplace l'élément directement sous <body> pour qu'il s'affiche
+  // vraiment au-dessus de tout, backdrop compris.
+  document.body.appendChild(pendingEl);
+  show('rsvp-gate-backdrop');
+  document.body.classList.add('gate-open');
   $('pending-name').textContent = currentInvite.nom;
   applyGuestIdentityToVoeuForm();
 }
@@ -2324,6 +2374,9 @@ function applyGuestIdentityToVoeuForm(){
 
 function showConfirmedView(){
   hide('rsvp-pending');hide('rsvp-declined');hide('rsvp-nocode');
+  $('rsvp-pending').classList.remove('rsvp-gate');
+  hide('rsvp-gate-backdrop');
+  document.body.classList.remove('gate-open');
   show('rsvp-confirmed');
   applyGuestIdentityToVoeuForm();
   const name = currentInvite.nom || '';
@@ -3042,7 +3095,7 @@ async function doLogin(){
   try{
     const ok = await sbRpc('verify_organizer_password', {plain: pwd});
     if(ok === true){
-      sessionStorage.setItem('org_authed','1');
+      safeSessionSet('org_authed','1');
       showDashboard();
     } else {
       errEl.textContent = 'Mot de passe incorrect';
@@ -3098,7 +3151,7 @@ async function changePassword(){
 }
 
 function logout(){
-  sessionStorage.removeItem('org_authed');
+  safeSessionRemove('org_authed');
   window.location.href = window.location.pathname;
 }
 
