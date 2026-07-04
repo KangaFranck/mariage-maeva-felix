@@ -752,6 +752,7 @@ section.page-section{padding:90px 24px}
   border-radius:12px;
   font-size:15px;
   color:var(--ink);
+  text-overflow:ellipsis;
   transition:border-color .25s,background .25s;
   font-family:'Cormorant Garamond',serif;
 }
@@ -858,6 +859,22 @@ section.page-section{padding:90px 24px}
 }
 body.gate-open{overflow:hidden}
 body.gate-open .nav{display:none}
+.reconfirm-gate{
+  position:fixed;inset:0;z-index:650;
+  background:var(--peacock);
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;overflow-y:auto;
+}
+.reconfirm-card{
+  max-width:480px;width:100%;
+  background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  border:1px solid rgba(244,199,106,.4);
+  border-radius:var(--radius-lg);
+  padding:44px 32px;text-align:center;
+}
+.reconfirm-actions{display:flex;flex-direction:column;gap:12px;margin-top:28px}
+.reconfirm-actions .btn-gold,.reconfirm-actions .btn-ghost{width:100%;justify-content:center}
+
 .rsvp-gate{
   position:fixed !important;
   inset:0;
@@ -1148,6 +1165,7 @@ footer{
   background:rgba(255,255,255,.06);
   color:var(--paper);
   border-color:rgba(255,255,255,.15);
+  text-overflow:ellipsis;
 }
 .org-login input:focus{background:rgba(255,255,255,.08);border-color:var(--gold)}
 .btn-primary{
@@ -1243,10 +1261,36 @@ footer{
   border:1px solid rgba(255,255,255,.15);
   border-radius:60px;
   color:var(--paper);
+  text-overflow:ellipsis;
+  overflow:hidden;
   font-size:14px;
 }
 .add-guest-form input:focus{outline:none;border-color:var(--gold)}
 .add-guest-form input::placeholder{color:rgba(255,255,255,.4)}
+.phone-group{display:flex;gap:8px;flex:1;min-width:280px}
+.add-guest-form select{
+  padding:14px 8px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:60px;
+  color:var(--paper);
+  font-size:13px;
+  max-width:118px;
+  flex:none;
+  color-scheme:dark;
+  text-overflow:ellipsis;
+}
+.add-guest-form select option{
+  background:#13355F;
+  color:var(--paper);
+}
+.add-guest-form select:focus{outline:none;border-color:var(--gold)}
+.phone-group input{flex:1;min-width:110px;text-overflow:ellipsis;overflow:hidden}
+.phone-hint{
+  font-size:12px;color:rgba(255,255,255,.5);
+  margin:6px 0 20px;
+  font-family:'Cinzel',serif;letter-spacing:.03em;
+}
 
 .guests-table{
   width:100%;border-collapse:collapse;margin-top:8px;
@@ -1271,6 +1315,8 @@ footer{
   border:1px solid rgba(255,255,255,.15);
   border-radius:60px;
   color:var(--paper);
+  text-overflow:ellipsis;
+  overflow:hidden;
   font-size:14px;
 }
 .search-bar input:focus{outline:none;border-color:var(--gold)}
@@ -1340,6 +1386,92 @@ footer{
 }
 
 /* Cooldown banner */
+.notif-msg-block{max-width:640px}
+.notif-msg-block textarea{
+  width:100%;
+  padding:16px 18px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:14px;
+  color:var(--paper);
+  font-size:14px;line-height:1.6;
+  font-family:'Cormorant Garamond',serif;
+  resize:vertical;min-height:120px;
+}
+.notif-msg-block textarea:focus{outline:none;border-color:var(--gold)}
+.notif-phone-inline{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.notif-phone-inline select{
+  padding:8px 6px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:60px;
+  color:var(--paper);
+  font-size:11px;
+  max-width:100px;
+  color-scheme:dark;
+}
+.notif-phone-inline select option{background:#13355F;color:var(--paper)}
+.notif-phone-inline input{
+  padding:8px 12px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:60px;
+  color:var(--paper);
+  font-size:12px;
+  width:110px;
+}
+.notif-phone-inline input::placeholder{color:rgba(255,255,255,.4)}
+.notif-btn{
+  padding:10px 20px;
+  border-radius:60px;
+  font-family:'Cinzel',serif;font-size:10px;letter-spacing:.15em;
+  font-weight:700;
+  transition:transform .2s,box-shadow .2s;
+  white-space:nowrap;
+  color:#fff;
+}
+.notif-btn:hover{transform:translateY(-2px)}
+.notif-btn-green{background:#3FA85C;box-shadow:0 4px 14px rgba(63,168,92,.35)}
+.notif-btn-green:hover{box-shadow:0 8px 20px rgba(63,168,92,.45)}
+.notif-btn-red{background:#D64545;box-shadow:0 4px 14px rgba(214,69,69,.35)}
+.notif-btn-red:hover{box-shadow:0 8px 20px rgba(214,69,69,.45)}
+.notif-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+
+.scan-mode-toggle{
+  display:flex;gap:4px;
+  background:rgba(255,255,255,.04);
+  padding:6px;border-radius:60px;
+  margin-bottom:24px;
+  border:1px solid rgba(244,199,106,.15);
+  max-width:420px;
+}
+.scan-mode-btn{
+  flex:1;
+  padding:12px 18px;
+  background:transparent;color:rgba(255,255,255,.7);
+  border-radius:50px;
+  font-family:'Cinzel',serif;font-size:10px;letter-spacing:.18em;
+  white-space:nowrap;transition:all .25s;
+}
+.scan-mode-btn.active{background:var(--grad-gold);color:var(--peacock);font-weight:700}
+.manual-code-label{
+  display:block;font-family:'Cinzel',serif;font-size:10px;letter-spacing:.25em;
+  color:var(--gold-light);margin-bottom:10px;text-transform:uppercase;
+}
+.manual-code-form{display:flex;gap:10px;flex-wrap:wrap}
+.manual-code-form input{
+  flex:1;min-width:180px;
+  padding:14px 18px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:60px;
+  color:var(--paper);
+  font-size:15px;letter-spacing:.05em;
+  text-overflow:ellipsis;
+}
+.manual-code-form input:focus{outline:none;border-color:var(--gold)}
+.manual-code-form input::placeholder{color:rgba(255,255,255,.4)}
+
 .scan-cooldown{
   margin-top:14px;padding:18px 20px;
   background:linear-gradient(135deg, rgba(229,169,60,.15), rgba(244,199,106,.08));
@@ -1693,6 +1825,17 @@ body.splash-on{overflow:hidden;height:100vh}
 <!-- ============== PUBLIC SITE ============== -->
 <div id="public-site">
   <div id="rsvp-gate-backdrop" class="hidden"></div>
+  <div id="reconfirm-gate" class="hidden">
+    <div class="reconfirm-card">
+      <div class="pass-label">Confirmation</div>
+      <div class="confirmed-title">Maintenez-vous votre présence ?</div>
+      <div class="confirmed-sub" style="margin-bottom:0">Un petit geste qui nous aide énormément pour l'organisation.</div>
+      <div class="reconfirm-actions">
+        <button class="btn-gold" onclick="answerReconfirm(true)">✓ Je maintiens ma présence</button>
+        <button class="btn-ghost" onclick="answerReconfirm(false)">✕ Je ne pourrai plus venir</button>
+      </div>
+    </div>
+  </div>
 
   <!-- HERO -->
   <section class="hero" id="hero">
@@ -1768,6 +1911,7 @@ body.splash-on{overflow:hidden;height:100vh}
           Confirmer ma présence
         </button>
         <div id="rsvp-feedback"></div>
+        <button class="btn-ghost" style="margin-top:18px;font-size:10px" onclick="declineInvitation()">Je ne pourrai malheureusement pas être présent(e)</button>
       </div>
 
       <!-- View 3: confirmed -->
@@ -1794,11 +1938,14 @@ body.splash-on{overflow:hidden;height:100vh}
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
           Télécharger
         </button>
+        <br>
+        <button class="btn-ghost" style="margin-top:14px;font-size:10px" onclick="requestDecline()">Un empêchement ? Modifier ma réponse</button>
       </div>
 
       <!-- View 4: declined -->
       <div id="rsvp-declined" class="rsvp-box hidden">
-        <p class="rsvp-msg" style="opacity:.7">Cette invitation a été déclinée. Si c'est une erreur, contactez les organisateurs.</p>
+        <div class="confirmed-title" style="margin-bottom:14px">Merci de nous avoir prévenus 💛</div>
+        <p class="rsvp-msg">Nous sommes tristes de ne pas vous compter parmi nous, mais nous comprenons. Merci d'avoir pris le temps de répondre, cela nous aide énormément pour l'organisation.</p>
       </div>
     </div>
   </section>
@@ -2031,6 +2178,7 @@ body.splash-on{overflow:hidden;height:100vh}
       <div class="stat-card"><div class="stat-num" id="st-confirmed">0</div><div class="stat-label">Confirmés</div></div>
       <div class="stat-card"><div class="stat-num" id="st-pending">0</div><div class="stat-label">En attente</div></div>
       <div class="stat-card"><div class="stat-num" id="st-entered">0</div><div class="stat-label">Présents</div></div>
+      <div class="stat-card"><div class="stat-num" id="st-reconfirmed">0</div><div class="stat-label">Reconfirmés</div></div>
     </div>
 
     <div class="org-tabs">
@@ -2038,6 +2186,7 @@ body.splash-on{overflow:hidden;height:100vh}
       <button class="org-tab" onclick="showTab('tables', this)">Tables</button>
       <button class="org-tab" onclick="showTab('scanner', this)">Scanner QR</button>
       <button class="org-tab" onclick="showTab('mouvements', this)">Mouvements</button>
+      <button class="org-tab" onclick="showTab('notifications', this)">Notifications</button>
       <button class="org-tab" onclick="showTab('parametres', this)">Paramètres</button>
     </div>
 
@@ -2046,16 +2195,52 @@ body.splash-on{overflow:hidden;height:100vh}
       <div class="add-guest-form">
         <input id="new-guest-name" type="text" placeholder="Nom complet de l'invité">
         <input id="new-guest-table" type="text" placeholder="Table (ex: Table 5)">
+        <div class="phone-group">
+          <select id="new-guest-phone-country" onchange="updatePhoneHint()">
+            <option value="225" data-min="10" data-max="10" data-name="Côte d'Ivoire" selected>+225 CIV</option>
+            <option value="33" data-min="9" data-max="9" data-name="France">+33 FRA</option>
+            <option value="221" data-min="9" data-max="9" data-name="Sénégal">+221 SEN</option>
+            <option value="223" data-min="8" data-max="8" data-name="Mali">+223 MLI</option>
+            <option value="226" data-min="8" data-max="8" data-name="Burkina Faso">+226 BFA</option>
+            <option value="227" data-min="8" data-max="8" data-name="Niger">+227 NER</option>
+            <option value="228" data-min="8" data-max="8" data-name="Togo">+228 TGO</option>
+            <option value="229" data-min="8" data-max="8" data-name="Bénin">+229 BEN</option>
+            <option value="224" data-min="9" data-max="9" data-name="Guinée">+224 GIN</option>
+            <option value="245" data-min="7" data-max="7" data-name="Guinée-Bissau">+245 GNB</option>
+            <option value="233" data-min="9" data-max="9" data-name="Ghana">+233 GHA</option>
+            <option value="234" data-min="10" data-max="10" data-name="Nigeria">+234 NGA</option>
+            <option value="231" data-min="8" data-max="9" data-name="Liberia">+231 LBR</option>
+            <option value="232" data-min="8" data-max="8" data-name="Sierra Leone">+232 SLE</option>
+            <option value="220" data-min="7" data-max="7" data-name="Gambie">+220 GMB</option>
+            <option value="238" data-min="7" data-max="7" data-name="Cap-Vert">+238 CPV</option>
+            <option value="222" data-min="8" data-max="8" data-name="Mauritanie">+222 MRT</option>
+            <option value="237" data-min="9" data-max="9" data-name="Cameroun">+237 CMR</option>
+            <option value="241" data-min="7" data-max="8" data-name="Gabon">+241 GAB</option>
+            <option value="242" data-min="9" data-max="9" data-name="Congo-Brazzaville">+242 COG</option>
+            <option value="235" data-min="8" data-max="8" data-name="Tchad">+235 TCD</option>
+            <option value="32" data-min="9" data-max="9" data-name="Belgique">+32 BEL</option>
+            <option value="41" data-min="9" data-max="9" data-name="Suisse">+41 CHE</option>
+            <option value="49" data-min="10" data-max="11" data-name="Allemagne">+49 DEU</option>
+            <option value="44" data-min="10" data-max="10" data-name="Royaume-Uni">+44 GBR</option>
+            <option value="39" data-min="9" data-max="10" data-name="Italie">+39 ITA</option>
+            <option value="34" data-min="9" data-max="9" data-name="Espagne">+34 ESP</option>
+            <option value="351" data-min="9" data-max="9" data-name="Portugal">+351 PRT</option>
+            <option value="31" data-min="9" data-max="9" data-name="Pays-Bas">+31 NLD</option>
+            <option value="352" data-min="9" data-max="9" data-name="Luxembourg">+352 LUX</option>
+          </select>
+          <input id="new-guest-phone" type="tel" inputmode="numeric" placeholder="Numéro" oninput="filterPhoneDigits(this)">
+        </div>
         <button class="btn-primary" onclick="addGuest()">+ Ajouter &amp; générer lien</button>
       </div>
+      <div id="phone-hint" class="phone-hint"></div>
       <div id="new-link-result" class="hidden"></div>
       <div class="search-bar" style="margin-top:24px">
-        <input id="guests-search" type="text" placeholder="Rechercher par nom ou par table…" oninput="filterGuests()">
+        <input id="guests-search" type="text" placeholder="Rechercher un invité…" oninput="filterGuests()">
       </div>
       <div style="overflow-x:auto;margin-top:16px">
         <table class="guests-table">
           <thead><tr>
-            <th>Nom</th><th>Table</th><th>Code</th><th>Statut</th><th>Présence</th><th>Actions</th>
+            <th>Nom</th><th>Table</th><th>Téléphone</th><th>Code</th><th>Statut</th><th>Présence</th><th>Actions</th>
           </tr></thead>
           <tbody id="guests-tbody"></tbody>
         </table>
@@ -2065,15 +2250,28 @@ body.splash-on{overflow:hidden;height:100vh}
     <div id="tab-tables" class="org-panel hidden">
       <h3>Invités par table</h3>
       <div class="search-bar">
-        <input id="tables-search" type="text" placeholder="Rechercher une table (ex: Table 5)…" oninput="renderTablesView()">
+        <input id="tables-search" type="text" placeholder="Rechercher une table…" oninput="renderTablesView()">
       </div>
       <div id="tables-grouped" style="margin-top:20px"></div>
     </div>
 
     <div id="tab-scanner" class="org-panel hidden">
       <h3>Scanner QR — Entrée / Sortie</h3>
-      <div id="scanner-wrap">
-        <div id="qr-reader"></div>
+      <div class="scan-mode-toggle">
+        <button class="scan-mode-btn active" id="mode-btn-camera" onclick="setScanMode('camera')">📷 Scanner QR</button>
+        <button class="scan-mode-btn" id="mode-btn-manual" onclick="setScanMode('manual')">⌨️ Saisir le code</button>
+      </div>
+      <div id="scan-mode-camera-panel">
+        <div id="scanner-wrap">
+          <div id="qr-reader"></div>
+        </div>
+      </div>
+      <div id="scan-mode-manual-panel" class="hidden">
+        <label for="manual-code-input" class="manual-code-label">Code d'invitation</label>
+        <div class="manual-code-form">
+          <input id="manual-code-input" type="text" placeholder="Ex: YAOT-ZB3I" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')verifyManualCode()">
+          <button class="btn-primary" onclick="verifyManualCode()">Vérifier</button>
+        </div>
       </div>
       <div id="scan-result"></div>
     </div>
@@ -2081,6 +2279,28 @@ body.splash-on{overflow:hidden;height:100vh}
     <div id="tab-mouvements" class="org-panel hidden">
       <h3>Historique des mouvements</h3>
       <div class="mvt-list" id="mvt-list"></div>
+    </div>
+
+    <div id="tab-notifications" class="org-panel hidden">
+      <h3>Notifier les invités</h3>
+      <div class="notif-msg-block">
+        <label class="manual-code-label">Message (modifiable — {nom} = prénom de l'invité, {lien} = son lien personnel de confirmation)</label>
+        <textarea id="notif-message" rows="7">Bonjour {nom},
+
+Petit rappel amical : merci de confirmer (ou de modifier) votre présence via votre lien personnel, cela nous aide beaucoup pour l'organisation :
+{lien}
+
+Nous avons hâte de vous voir ! 🌺</textarea>
+      </div>
+      <div class="search-bar" style="margin-top:20px">
+        <input id="notif-search" type="text" placeholder="Rechercher un invité…" oninput="renderNotifList()">
+      </div>
+      <div style="overflow-x:auto;margin-top:16px">
+        <table class="guests-table">
+          <thead><tr><th>Nom</th><th>Téléphone</th><th>Statut RSVP</th><th>Notification</th></tr></thead>
+          <tbody id="notif-tbody"></tbody>
+        </table>
+      </div>
     </div>
 
     <div id="tab-parametres" class="org-panel hidden">
@@ -2336,9 +2556,13 @@ async function loadInvite(code){
     }
     currentInvite = data[0];
     if(currentInvite.statut === 'confirme'){
-      showConfirmedView();
+      if(!currentInvite.reconfirme){
+        showReconfirmGate();
+      } else {
+        showConfirmedView();
+      }
     } else if(currentInvite.statut === 'decline'){
-      show('rsvp-declined');
+      showDeclinedView();
     } else {
       showPendingView();
     }
@@ -2364,6 +2588,32 @@ function showPendingView(){
   applyGuestIdentityToVoeuForm();
 }
 
+function showDeclinedView(){
+  hide('rsvp-pending');hide('rsvp-confirmed');hide('rsvp-nocode');hide('reconfirm-gate');
+  const declinedEl = $('rsvp-declined');
+  declinedEl.classList.add('rsvp-gate');
+  // Même correctif que pour la vue en attente : on sort l'élément de
+  // #rsvp-section (qui a son propre contexte d'empilement) pour qu'il
+  // s'affiche vraiment plein écran, au-dessus de tout.
+  document.body.appendChild(declinedEl);
+  show('rsvp-gate-backdrop');
+  document.body.classList.add('gate-open');
+  show('rsvp-declined');
+}
+
+async function declineInvitation(){
+  if(!currentInvite) return;
+  const ok = confirm("Êtes-vous sûr(e) de vouloir décliner cette invitation ? Vous pourrez changer d'avis plus tard via ce même lien.");
+  if(!ok) return;
+  try{
+    await sbPatch('invites', `id=eq.${currentInvite.id}`, {statut:'decline'});
+  } catch(e){
+    console.error('[DECLINE] erreur', e);
+  }
+  currentInvite.statut = 'decline';
+  showDeclinedView();
+}
+
 function applyGuestIdentityToVoeuForm(){
   if(currentInvite && currentInvite.nom){
     hide('voeu-nom-group');
@@ -2386,6 +2636,44 @@ function showConfirmedView(){
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(currentInvite.code)}&color=0A2540&bgcolor=FAF8F2&format=png&margin=10`;
   $('qr-img').src = qrUrl;
 }
+
+function showReconfirmGate(){
+  hide('rsvp-pending');hide('rsvp-declined');hide('rsvp-nocode');hide('rsvp-confirmed');
+  show('reconfirm-gate');
+  document.body.classList.add('gate-open');
+}
+
+async function answerReconfirm(maintain){
+  if(!currentInvite) return;
+  hide('reconfirm-gate');
+  document.body.classList.remove('gate-open');
+  if(maintain){
+    try{ await sbPatch('invites', `id=eq.${currentInvite.id}`, {reconfirme:true}); }
+    catch(e){ console.error('[RECONFIRM] erreur', e); }
+    currentInvite.reconfirme = true;
+    showConfirmedView();
+  } else {
+    try{ await sbPatch('invites', `id=eq.${currentInvite.id}`, {statut:'decline', reconfirme:false}); }
+    catch(e){ console.error('[RECONFIRM] erreur', e); }
+    currentInvite.statut = 'decline';
+    currentInvite.reconfirme = false;
+    showDeclinedView();
+  }
+}
+
+async function requestDecline(){
+  if(!currentInvite) return;
+  const ok = confirm("Voulez-vous vraiment décliner votre présence ? Vous pourrez changer d'avis plus tard via ce même lien.");
+  if(!ok) return;
+  try{
+    await sbPatch('invites', `id=eq.${currentInvite.id}`, {statut:'decline'});
+    currentInvite.statut = 'decline';
+    showDeclinedView();
+  } catch(e){
+    alert("Erreur, réessayez.");
+  }
+}
+
 
 /* ============== CAMERA / SELFIE ============== */
 let mediaStream = null;
@@ -2481,8 +2769,16 @@ async function confirmAttendance(){
   $('rsvp-feedback').innerHTML='';
   try{
     const selfieUrl = await uploadSelfie(capturedBlob, currentInvite.code);
-    const patchData = { statut:'confirme' };
-    if(selfieUrl) patchData.selfie_url = selfieUrl;
+    if(!selfieUrl){
+      // L'envoi de la photo a échoué : on ne confirme PAS silencieusement sans
+      // photo (sinon l'invité se croit confirmé alors que sa carte restera
+      // sans selfie). On le laisse réessayer.
+      btn.disabled = false;
+      btn.textContent = 'Confirmer ma présence';
+      $('rsvp-feedback').innerHTML = '<div class="error">Votre photo n\'a pas pu être envoyée (connexion instable ?). Reprenez si besoin un nouveau selfie puis réessayez.</div>';
+      return;
+    }
+    const patchData = { statut:'confirme', selfie_url: selfieUrl };
     await sbPatch('invites', `id=eq.${currentInvite.id}`, patchData);
     currentInvite.statut = 'confirme';
     currentInvite.selfie_url = selfieUrl;
@@ -2573,6 +2869,24 @@ async function downloadPDF(){
 
     // ===== LEFT PANEL: couple photo with overlay text =====
     const LEFT_W = 78;
+    function drawLeftPanelFallback(){
+      // Filet de sécurité : si la photo ne charge pas (ou CONFIG.couplePhoto est
+      // vide), on affiche quand même un panneau soigné avec les noms, plutôt
+      // qu'un rectangle vide.
+      doc.setFillColor(...PEACOCK);
+      doc.rect(0,0,LEFT_W,H,'F');
+      doc.setTextColor(...GOLD_LIGHT);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(8);
+      doc.text('MARIAGE', LEFT_W/2, H*0.72, {align:'center', charSpace:1.5});
+      doc.setDrawColor(...GOLD);
+      doc.setLineWidth(.3);
+      doc.line(LEFT_W/2-16, H*0.76, LEFT_W/2+16, H*0.76);
+      doc.setTextColor(...CREAM);
+      doc.setFont('times','italic');
+      doc.setFontSize(15);
+      doc.text('Maeva & Felix', LEFT_W/2, H*0.83, {align:'center'});
+    }
     if(CONFIG.couplePhoto){
       try{
         const img = await loadImageForPdf(CONFIG.couplePhoto);
@@ -2580,10 +2894,11 @@ async function downloadPDF(){
         doc.addImage(photoData,'JPEG',0,0,LEFT_W,H);
       }catch(e){
         console.warn('couple photo failed', e);
-        // fallback: gradient on left
-        doc.setFillColor(...PEACOCK);
-        doc.rect(0,0,LEFT_W,H,'F');
+        drawLeftPanelFallback();
       }
+    } else {
+      console.warn('[PDF] CONFIG.couplePhoto est vide — vérifiez que la photo du couple a bien chargé');
+      drawLeftPanelFallback();
     }
 
     // ===== RIGHT PANEL background — peacock feather pattern (procedural) =====
@@ -2681,17 +2996,52 @@ async function downloadPDF(){
     doc.setFontSize(6);
     doc.text('CODE INVITATION', RX, nameY+4.5, {align:'center', charSpace:.5});
 
-    // Code box
+    // Code box (+ badge TABLE à côté si assignée — même ligne, aucune hauteur ajoutée)
     const codeText = currentInvite.code;
+    const hasTable = !!(currentInvite.table_nom && currentInvite.table_nom.trim());
     doc.setFont('courier','bold');
     doc.setFontSize(9);
     const codeW = doc.getTextWidth(codeText) + 5;
     const codeBoxY = nameY + 6;
-    doc.setDrawColor(...GOLD);
-    doc.setLineWidth(.2);
-    doc.roundedRect(RX - codeW/2, codeBoxY, codeW, 5, 1, 1, 'S');
-    doc.setTextColor(...CREAM);
-    doc.text(codeText, RX, codeBoxY+3.6, {align:'center'});
+    if(hasTable){
+      const tableText = 'TABLE : ' + currentInvite.table_nom.trim().toUpperCase();
+      // Réduit progressivement la police si le texte est trop long pour la place disponible
+      const maxTableW = 58; // mm — budget raisonnable à côté du code
+      let tableFontSize = 9;
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(tableFontSize);
+      let tableW = doc.getTextWidth(tableText) + 6;
+      while(tableW > maxTableW && tableFontSize > 5){
+        tableFontSize -= 0.5;
+        doc.setFontSize(tableFontSize);
+        tableW = doc.getTextWidth(tableText) + 6;
+      }
+      const gapTC = 4;
+      const totalW = codeW + tableW + gapTC;
+      const codeX0 = RX - totalW/2;
+      const tableX0 = codeX0 + codeW + gapTC;
+
+      doc.setDrawColor(...GOLD);
+      doc.setLineWidth(.2);
+      doc.roundedRect(codeX0, codeBoxY, codeW, 5, 1, 1, 'S');
+      doc.setFont('courier','bold');
+      doc.setFontSize(9);
+      doc.setTextColor(...CREAM);
+      doc.text(codeText, codeX0 + codeW/2, codeBoxY+3.6, {align:'center'});
+
+      doc.setFillColor(...GOLD);
+      doc.roundedRect(tableX0, codeBoxY, tableW, 5, 1, 1, 'F');
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(tableFontSize);
+      doc.setTextColor(...PEACOCK_DEEP);
+      doc.text(tableText, tableX0 + tableW/2, codeBoxY+3.6, {align:'center'});
+    } else {
+      doc.setDrawColor(...GOLD);
+      doc.setLineWidth(.2);
+      doc.roundedRect(RX - codeW/2, codeBoxY, codeW, 5, 1, 1, 'S');
+      doc.setTextColor(...CREAM);
+      doc.text(codeText, RX, codeBoxY+3.6, {align:'center'});
+    }
 
     // ===== DÉROULÉ DE LA JOURNÉE (avec heures + lieux clairs) =====
     let dy = codeBoxY + 9;
@@ -2896,43 +3246,6 @@ function drawSpacedText(ctx, text, cx, y, spacing){
   ctx.textAlign = 'center';
 }
 
-function renderCircleAvatar(img, size, bgRgb, ringRgb){
-  const c = document.createElement('canvas');
-  c.width = c.height = size;
-  const ctx = c.getContext('2d');
-  // bg matches PDF background → corners blend
-  ctx.fillStyle = `rgb(${bgRgb.join(',')})`;
-  ctx.fillRect(0,0,size,size);
-  // clip + image
-  const ringW = Math.round(size*0.035);
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(size/2, size/2, size/2 - ringW - 2, 0, Math.PI*2);
-  ctx.clip();
-  const ratio = Math.max(size / img.width, size / img.height);
-  const iw = img.width * ratio, ih = img.height * ratio;
-  ctx.drawImage(img, (size-iw)/2, (size-ih)/2, iw, ih);
-  ctx.restore();
-  // outer halo
-  ctx.strokeStyle = `rgba(${ringRgb.join(',')},.45)`;
-  ctx.lineWidth = ringW + 4;
-  ctx.beginPath();
-  ctx.arc(size/2, size/2, size/2 - (ringW+4)/2, 0, Math.PI*2);
-  ctx.stroke();
-  // gold ring
-  ctx.strokeStyle = `rgb(${ringRgb.join(',')})`;
-  ctx.lineWidth = ringW;
-  ctx.beginPath();
-  ctx.arc(size/2, size/2, size/2 - ringW/2 - 2, 0, Math.PI*2);
-  ctx.stroke();
-  // outer thin halo
-  ctx.strokeStyle = `rgba(${ringRgb.join(',')},.7)`;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.arc(size/2, size/2, size/2 - 1.5, 0, Math.PI*2);
-  ctx.stroke();
-  return c.toDataURL('image/jpeg', .92);
-}
 
 function drawCornerAccent(doc, x, y, color, flipY){
   doc.setDrawColor(...color);
@@ -3170,12 +3483,13 @@ const SCAN_COOLDOWN_MS = 60000; // 60 secondes entre deux scans réussis
 function showTab(tab, btn){
   document.querySelectorAll('.org-tab').forEach(t=>t.classList.remove('active'));
   if(btn) btn.classList.add('active');
-  ['invites','tables','scanner','mouvements','parametres'].forEach(t=>hide('tab-'+t));
+  ['invites','tables','scanner','mouvements','notifications','parametres'].forEach(t=>hide('tab-'+t));
   show('tab-'+tab);
-  if(tab==='scanner') initScanner();
+  if(tab==='scanner') setScanMode('camera');
   else stopScanner();
   if(tab==='mouvements') loadMouvements();
   if(tab==='tables') renderTablesView();
+  if(tab==='notifications') renderNotifList();
   if(tab==='parametres'){
     // Reset form fields when entering settings
     ['cp-old','cp-new','cp-confirm'].forEach(id=>{ const el=$(id); if(el) el.value=''; });
@@ -3192,18 +3506,23 @@ async function loadDashboard(){
   $('st-confirmed').textContent = invites.filter(i=>i.statut==='confirme').length;
   $('st-pending').textContent = invites.filter(i=>i.statut==='en_attente').length;
   $('st-entered').textContent = invites.filter(i=>i.presence==='entre').length;
+  $('st-reconfirmed').textContent = invites.filter(i=>i.statut==='confirme' && i.reconfirme).length;
   renderGuestsTable(invites);
 }
 
 function renderGuestsTable(invites){
   const tbody = $('guests-tbody');
   if(invites.length===0){
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,.5);font-style:italic;padding:30px">Aucun invité pour le moment.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:rgba(255,255,255,.5);font-style:italic;padding:30px">Aucun invité pour le moment.</td></tr>';
     return;
   }
   tbody.innerHTML = invites.map(i=>{
     let statutBadge = '';
-    if(i.statut==='confirme') statutBadge = '<span class="badge badge-confirmed">CONFIRMÉ</span>';
+    if(i.statut==='confirme'){
+      statutBadge = '<span class="badge badge-confirmed">CONFIRMÉ</span>';
+      if(i.reconfirme) statutBadge += ' <span class="badge badge-confirmed" style="margin-left:4px">✓✓ RECONFIRMÉ</span>';
+      if(!i.selfie_url) statutBadge += ' <span class="badge badge-declined" style="margin-left:4px" title="La photo n\'a pas été enregistrée (échec d\'envoi)">📷 SANS PHOTO</span>';
+    }
     else if(i.statut==='decline') statutBadge = '<span class="badge badge-declined">DÉCLINÉ</span>';
     else statutBadge = '<span class="badge badge-pending">EN ATTENTE</span>';
     let presBadge = '—';
@@ -3213,12 +3532,13 @@ function renderGuestsTable(invites){
       <tr>
         <td><strong>${escapeHtml(i.nom||'')}</strong></td>
         <td>${escapeHtml(i.table_nom||'—')}</td>
+        <td>${escapeHtml(i.telephone||'—')}</td>
         <td><code style="font-size:12px;color:var(--gold-light)">${escapeHtml(i.code||'—')}</code></td>
         <td>${statutBadge}</td>
         <td>${presBadge}</td>
         <td>
           ${i.code?`<button class="action-btn" onclick="copyLink('${i.code}')">📋 Lien</button>`:''}
-          ${i.code?`<button class="action-btn" onclick="shareWhatsApp('${i.code}','${escapeHtml(i.nom||'')}')">📱 WhatsApp</button>`:''}
+          ${i.code?`<button class="action-btn" onclick="shareWhatsApp('${i.code}','${escapeHtml(i.nom||'')}','${escapeHtml(i.telephone||'')}')">📱 WhatsApp</button>`:''}
           <button class="action-btn danger" onclick="deleteGuest('${i.id}','${escapeHtml(i.nom||'')}')">Supprimer</button>
         </td>
       </tr>
@@ -3234,6 +3554,128 @@ function filterGuests(){
     (i.table_nom||'').toLowerCase().includes(q)
   );
   renderGuestsTable(filtered);
+}
+
+const COUNTRY_CODES = [
+  {c:'225',min:10,max:10,name:"Côte d'Ivoire",abbr:'CIV'},
+  {c:'33',min:9,max:9,name:'France',abbr:'FRA'},
+  {c:'221',min:9,max:9,name:'Sénégal',abbr:'SEN'},
+  {c:'223',min:8,max:8,name:'Mali',abbr:'MLI'},
+  {c:'226',min:8,max:8,name:'Burkina Faso',abbr:'BFA'},
+  {c:'227',min:8,max:8,name:'Niger',abbr:'NER'},
+  {c:'228',min:8,max:8,name:'Togo',abbr:'TGO'},
+  {c:'229',min:8,max:8,name:'Bénin',abbr:'BEN'},
+  {c:'224',min:9,max:9,name:'Guinée',abbr:'GIN'},
+  {c:'245',min:7,max:7,name:'Guinée-Bissau',abbr:'GNB'},
+  {c:'233',min:9,max:9,name:'Ghana',abbr:'GHA'},
+  {c:'234',min:10,max:10,name:'Nigeria',abbr:'NGA'},
+  {c:'231',min:8,max:9,name:'Liberia',abbr:'LBR'},
+  {c:'232',min:8,max:8,name:'Sierra Leone',abbr:'SLE'},
+  {c:'220',min:7,max:7,name:'Gambie',abbr:'GMB'},
+  {c:'238',min:7,max:7,name:'Cap-Vert',abbr:'CPV'},
+  {c:'222',min:8,max:8,name:'Mauritanie',abbr:'MRT'},
+  {c:'237',min:9,max:9,name:'Cameroun',abbr:'CMR'},
+  {c:'241',min:7,max:8,name:'Gabon',abbr:'GAB'},
+  {c:'242',min:9,max:9,name:'Congo-Brazzaville',abbr:'COG'},
+  {c:'235',min:8,max:8,name:'Tchad',abbr:'TCD'},
+  {c:'32',min:9,max:9,name:'Belgique',abbr:'BEL'},
+  {c:'41',min:9,max:9,name:'Suisse',abbr:'CHE'},
+  {c:'49',min:10,max:11,name:'Allemagne',abbr:'DEU'},
+  {c:'44',min:10,max:10,name:'Royaume-Uni',abbr:'GBR'},
+  {c:'39',min:9,max:10,name:'Italie',abbr:'ITA'},
+  {c:'34',min:9,max:9,name:'Espagne',abbr:'ESP'},
+  {c:'351',min:9,max:9,name:'Portugal',abbr:'PRT'},
+  {c:'31',min:9,max:9,name:'Pays-Bas',abbr:'NLD'},
+  {c:'352',min:9,max:9,name:'Luxembourg',abbr:'LUX'}
+];
+function countryOptionsHtml(){
+  return COUNTRY_CODES.map(x=>`<option value="${x.c}" data-min="${x.min}" data-max="${x.max}" data-name="${x.name}" ${x.c==='225'?'selected':''}>+${x.c} ${x.abbr}</option>`).join('');
+}
+
+function renderNotifList(){
+  const tbody = $('notif-tbody');
+  if(!tbody) return;
+  const q = ($('notif-search')?.value || '').trim().toLowerCase();
+  let list = allInvites;
+  if(q) list = list.filter(i => (i.nom||'').toLowerCase().includes(q));
+  if(list.length===0){
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,.5);font-style:italic;padding:30px">Aucun invité.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(i=>{
+    let statutBadge = '';
+    if(i.statut==='confirme') statutBadge = '<span class="badge badge-confirmed">CONFIRMÉ</span>';
+    else if(i.statut==='decline') statutBadge = '<span class="badge badge-declined">DÉCLINÉ</span>';
+    else statutBadge = '<span class="badge badge-pending">EN ATTENTE</span>';
+    const notified = !!i.notifie;
+    const hasPhone = !!(i.telephone && i.telephone.trim());
+    let actionCell;
+    if(!hasPhone){
+      actionCell = `
+        <div class="notif-phone-inline">
+          <select id="notif-cc-${i.id}">${countryOptionsHtml()}</select>
+          <input type="tel" inputmode="numeric" id="notif-num-${i.id}" placeholder="Numéro" oninput="filterPhoneDigits(this)">
+          <button class="notif-btn notif-btn-green" onclick="saveAndNotify('${i.id}')">📱 Enregistrer &amp; Envoyer</button>
+        </div>
+      `;
+    } else {
+      const btnClass = notified ? 'notif-btn notif-btn-red' : 'notif-btn notif-btn-green';
+      const btnLabel = notified ? '✓ Notifié — Renvoyer' : '📱 Envoyer';
+      actionCell = `<button class="${btnClass}" onclick="sendNotification('${i.id}')">${btnLabel}</button>`;
+    }
+    return `
+      <tr>
+        <td><strong>${escapeHtml(i.nom||'')}</strong></td>
+        <td>${escapeHtml(i.telephone||'—')}</td>
+        <td>${statutBadge}</td>
+        <td>${actionCell}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function sendNotification(id){
+  const guest = allInvites.find(i=>i.id===id);
+  if(!guest) return;
+  const phone = (guest.telephone || '').replace(/\D/g,'');
+  if(!phone){ toast('Aucun numéro pour cet invité'); return; }
+  const template = $('notif-message').value || '';
+  const firstName = (guest.nom || '').split(' ')[0];
+  const guestLink = `${window.location.origin}${window.location.pathname}?invite=${guest.code}`;
+  const msg = template.replace(/\{nom\}/g, firstName || guest.nom || '').replace(/\{lien\}/g, guestLink);
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+  try{
+    await sbPatch('invites', `id=eq.${id}`, {notifie:true});
+    guest.notifie = true;
+    renderNotifList();
+  } catch(e){
+    console.error('[NOTIF] erreur maj statut', e);
+  }
+}
+
+async function saveAndNotify(id){
+  const guest = allInvites.find(i=>i.id===id);
+  if(!guest) return;
+  const ccSel = $('notif-cc-'+id);
+  const numInput = $('notif-num-'+id);
+  if(!ccSel || !numInput) return;
+  const opt = ccSel.options[ccSel.selectedIndex];
+  const digits = (numInput.value || '').replace(/\D/g,'');
+  const min = Number(opt.dataset.min), max = Number(opt.dataset.max);
+  if(!digits || digits.length < min || digits.length > max){
+    toast(`Numéro invalide pour ${opt.dataset.name} (attendu : ${min===max?min:min+'-'+max} chiffres)`);
+    return;
+  }
+  const phone = '+' + opt.value + digits;
+  try{
+    await sbPatch('invites', `id=eq.${id}`, {telephone: phone});
+    guest.telephone = phone;
+  } catch(e){
+    console.error('[NOTIF] erreur enregistrement numéro', e);
+    toast('Erreur lors de l\'enregistrement du numéro');
+    return;
+  }
+  await sendNotification(id);
 }
 
 function renderTablesView(){
@@ -3274,6 +3716,20 @@ function renderTablesView(){
 async function addGuest(){
   const name = $('new-guest-name').value.trim();
   const tableNom = ($('new-guest-table')?.value || '').trim();
+  const countrySel = $('new-guest-phone-country');
+  const countryOpt = countrySel ? countrySel.options[countrySel.selectedIndex] : null;
+  const countryCode = countrySel ? countrySel.value : '';
+  const phoneDigits = ($('new-guest-phone')?.value || '').replace(/\D/g,'');
+  let phone = '';
+  if(phoneDigits){
+    const min = countryOpt ? Number(countryOpt.dataset.min) : 0;
+    const max = countryOpt ? Number(countryOpt.dataset.max) : 99;
+    if(phoneDigits.length < min || phoneDigits.length > max){
+      toast(`Numéro invalide pour ${countryOpt ? countryOpt.dataset.name : 'ce pays'} (attendu : ${min===max?min:min+'-'+max} chiffres)`);
+      return;
+    }
+    phone = '+' + countryCode + phoneDigits;
+  }
   if(!name){ toast('Saisir un nom'); return; }
   const id = generateId();
   // Auto-retry en cas de collision (extrêmement rare mais blindage 500+ invités)
@@ -3288,6 +3744,7 @@ async function addGuest(){
         body:JSON.stringify({
           id, code, nom:name,
           table_nom: tableNom || null,
+          telephone: phone || null,
           statut:'en_attente',
           scanned:false,
           created_at:new Date().toISOString()
@@ -3319,12 +3776,13 @@ async function addGuest(){
         <div class="link-box">${link}</div>
         <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
           <button class="action-btn" onclick="copyLink('${code}')">📋 Copier le lien</button>
-          <button class="action-btn" onclick="shareWhatsApp('${code}','${escapeHtml(name)}')">📱 WhatsApp</button>
+          <button class="action-btn" onclick="shareWhatsApp('${code}','${escapeHtml(name)}','${escapeHtml(phone)}')">📱 WhatsApp</button>
         </div>
       </div>
     `;
     $('new-guest-name').value = '';
     $('new-guest-table').value = '';
+    $('new-guest-phone').value = '';
     toast('Invité ajouté avec succès');
     loadDashboard();
   } catch(e){
@@ -3337,10 +3795,31 @@ function copyLink(code){
   navigator.clipboard.writeText(link).then(()=>toast('Lien copié dans le presse-papier'));
 }
 
-function shareWhatsApp(code, name){
+function filterPhoneDigits(el){
+  el.value = el.value.replace(/[^\d\s]/g,'');
+}
+function updatePhoneHint(){
+  const sel = $('new-guest-phone-country');
+  if(!sel) return;
+  const opt = sel.options[sel.selectedIndex];
+  const min = opt.dataset.min, max = opt.dataset.max, name = opt.dataset.name;
+  const hint = $('phone-hint');
+  if(hint){
+    hint.textContent = (min === max)
+      ? `Format ${name} : ${min} chiffres après l'indicatif (sans le 0 initial s'il y en a un).`
+      : `Format ${name} : entre ${min} et ${max} chiffres après l'indicatif.`;
+  }
+  const phoneInput = $('new-guest-phone');
+  if(phoneInput) phoneInput.maxLength = Number(max) + 3;
+}
+updatePhoneHint();
+
+function shareWhatsApp(code, name, phone){
   const link = `${window.location.origin}${window.location.pathname}?invite=${code}`;
   const msg = `Bonjour ${name},\n\nVous êtes cordialement invité(e) au mariage de Maeva & Felix le 01 août 2026.\n\nVoici votre invitation personnelle :\n${link}\n\nMerci de confirmer votre présence. 🦚`;
-  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+  const digits = (phone || '').replace(/[^0-9]/g, '');
+  const url = digits ? `https://wa.me/${digits}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(url,'_blank');
 }
 
 async function deleteGuest(id, name){
@@ -3420,6 +3899,24 @@ async function onScanSuccess(decodedText){
   `;
   startScanCooldown();
   loadDashboard();
+}
+
+function setScanMode(mode){
+  const isCam = mode === 'camera';
+  $('scan-mode-camera-panel').classList.toggle('hidden', !isCam);
+  $('scan-mode-manual-panel').classList.toggle('hidden', isCam);
+  $('mode-btn-camera').classList.toggle('active', isCam);
+  $('mode-btn-manual').classList.toggle('active', !isCam);
+  $('scan-result').innerHTML = '';
+  if(isCam){ initScanner(); } else { stopScanner(); }
+}
+
+async function verifyManualCode(){
+  const input = $('manual-code-input');
+  const code = (input.value || '').trim().toUpperCase();
+  if(!code){ toast('Saisir un code'); return; }
+  await onScanSuccess(code);
+  input.value = '';
 }
 
 function startScanCooldown(){
