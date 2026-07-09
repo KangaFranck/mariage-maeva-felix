@@ -1365,6 +1365,22 @@ footer{
 }
 .action-btn:hover{background:rgba(244,199,106,.15);border-color:var(--gold-light);color:var(--gold-light)}
 .action-btn.danger:hover{background:rgba(255,139,122,.15);border-color:#FF8B7A;color:#FF8B7A}
+.action-btn.sent{background:rgba(123,197,142,.15);border-color:var(--mint);color:var(--mint)}
+.action-btn.sent:hover{background:rgba(123,197,142,.28);border-color:var(--mint);color:var(--mint)}
+
+.phone-edit-input{
+  background:transparent;
+  border:1px solid transparent;
+  border-radius:6px;
+  color:rgba(255,255,255,.92);
+  font-size:14px;font-family:inherit;
+  padding:5px 8px;margin:-5px -8px;
+  width:150px;max-width:100%;
+  transition:all .2s;
+}
+.phone-edit-input:hover{border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.04)}
+.phone-edit-input:focus{outline:none;border-color:var(--gold);background:rgba(255,255,255,.06)}
+.phone-edit-input::placeholder{color:rgba(255,255,255,.35)}
 
 .link-box{
   background:rgba(0,0,0,.25);padding:12px 14px;border-radius:8px;
@@ -3637,13 +3653,13 @@ function renderGuestsTable(invites){
       <tr>
         <td><strong>${escapeHtml(i.nom||'')}</strong></td>
         <td>${escapeHtml(i.table_nom||'—')}</td>
-        <td>${escapeHtml(i.telephone||'—')}</td>
+        <td><input type="tel" inputmode="tel" class="phone-edit-input" data-id="${i.id}" value="${escapeHtml(i.telephone||'')}" placeholder="+225…" onblur="savePhoneEdit(this)" onkeydown="if(event.key==='Enter')this.blur()"></td>
         <td><code style="font-size:12px;color:var(--gold-light)">${escapeHtml(i.code||'—')}</code></td>
         <td>${statutBadge}</td>
         <td>${presBadge}</td>
         <td>
           ${i.code?`<button class="action-btn" onclick="copyLink('${i.code}')">📋 Lien</button>`:''}
-          ${i.code?`<button class="action-btn" data-code="${i.code}" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" onclick="shareWhatsApp(this)">📱 WhatsApp</button>`:''}
+          ${i.code?`<button class="action-btn${i.notifie?' sent':''}" data-id="${i.id}" data-code="${i.code}" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" onclick="shareWhatsApp(this)">${i.notifie?'✓ Envoyé — Renvoyer':'📱 WhatsApp'}</button>`:''}
           <button class="action-btn danger" data-id="${i.id}" data-nom="${escapeHtml(i.nom||'')}" onclick="deleteGuest(this)">Supprimer</button>
         </td>
       </tr>
@@ -3881,7 +3897,7 @@ async function addGuest(){
         <div class="link-box">${link}</div>
         <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
           <button class="action-btn" onclick="copyLink('${code}')">📋 Copier le lien</button>
-          <button class="action-btn" data-code="${code}" data-nom="${escapeHtml(name)}" data-tel="${escapeHtml(phone)}" onclick="shareWhatsApp(this)">📱 WhatsApp</button>
+          <button class="action-btn" data-id="${id}" data-code="${code}" data-nom="${escapeHtml(name)}" data-tel="${escapeHtml(phone)}" onclick="shareWhatsApp(this)">📱 WhatsApp</button>
         </div>
       </div>
     `;
@@ -3920,14 +3936,15 @@ function updatePhoneHint(){
 updatePhoneHint();
 
 function shareWhatsApp(btnOrCode, maybeName, maybePhone){
-  // Accepte soit l'élément bouton (data-code/data-nom/data-tel), soit les
-  // arguments bruts (compat rétro). Passer par des data-attributes évite de
-  // casser le onclick inline quand le nom contient une apostrophe (ex: N'Guessan).
-  let code, name, phone;
+  // Accepte soit l'élément bouton (data-code/data-nom/data-tel/data-id), soit
+  // les arguments bruts (compat rétro). Passer par des data-attributes évite
+  // de casser le onclick inline quand le nom contient une apostrophe (ex: N'Guessan).
+  let code, name, phone, id;
   if(btnOrCode instanceof HTMLElement){
     code = btnOrCode.dataset.code;
     name = btnOrCode.dataset.nom || '';
     phone = btnOrCode.dataset.tel || '';
+    id = btnOrCode.dataset.id || '';
   } else {
     code = btnOrCode; name = maybeName || ''; phone = maybePhone || '';
   }
@@ -3936,6 +3953,40 @@ function shareWhatsApp(btnOrCode, maybeName, maybePhone){
   const digits = (phone || '').replace(/[^0-9]/g, '');
   const url = digits ? `https://wa.me/${digits}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
   window.open(url,'_blank');
+  if(id) markNotified(id);
+}
+
+async function markNotified(id){
+  // Marque l'invité comme notifié pour éviter de renvoyer l'invitation par
+  // erreur. Le bouton reste cliquable (renvoi volontaire toujours possible).
+  try{
+    await sbPatch('invites', `id=eq.${id}`, {notifie:true});
+    const guest = allInvites.find(i=>i.id===id);
+    if(guest) guest.notifie = true;
+    filterGuests();
+    if(typeof renderNotifList === 'function') renderNotifList();
+  } catch(e){
+    console.error('[NOTIF] erreur maj statut', e);
+  }
+}
+
+async function savePhoneEdit(input){
+  const id = input.dataset.id;
+  const guest = allInvites.find(i=>i.id===id);
+  if(!guest) return;
+  const newPhone = input.value.trim();
+  if(newPhone === (guest.telephone||'')) return;
+  try{
+    await sbPatch('invites', `id=eq.${id}`, {telephone: newPhone || null});
+    guest.telephone = newPhone;
+    toast('Numéro mis à jour');
+    filterGuests();
+    if(typeof renderNotifList === 'function') renderNotifList();
+  } catch(e){
+    console.error('[PHONE] erreur maj', e);
+    toast('Erreur lors de la mise à jour du numéro');
+    input.value = guest.telephone || '';
+  }
 }
 
 async function deleteGuest(btnOrId, maybeName){
