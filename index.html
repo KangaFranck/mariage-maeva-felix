@@ -1614,6 +1614,61 @@ footer{
   max-width:680px;
 }
 
+/* ===============================================================
+   PRE-SPLASH — image plein écran avant l'animation
+   =============================================================== */
+.pre-splash{
+  position:fixed;inset:0;z-index:10001;
+  background:#0A2540;
+  overflow:hidden;
+  opacity:1;
+  transition:opacity .9s ease, transform .9s ease;
+}
+.pre-splash img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  opacity:0;
+  transform:scale(1.08);
+  animation:preImgReveal 1.3s ease .1s forwards;
+}
+.pre-splash::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg, rgba(10,37,64,.10) 0%, rgba(6,24,48,.5) 100%);
+}
+.pre-splash.pre-splash-out{
+  opacity:0;
+  transform:scale(1.04);
+  pointer-events:none;
+}
+@keyframes preImgReveal{
+  to{opacity:1;transform:scale(1)}
+}
+
+.pre-splash-deco{position:absolute;inset:0;z-index:2;pointer-events:none}
+.pre-splash-deco .deco{
+  position:absolute;
+  opacity:0;
+  animation:decoFloat 2.4s ease-in-out forwards;
+}
+.pre-splash-deco .heart{
+  font-size:30px;color:#F0B8B8;
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,.4));
+}
+.pre-splash-deco .ring-icon{width:38px;height:26px;display:block;filter:drop-shadow(0 4px 12px rgba(0,0,0,.4))}
+.pre-splash-deco .d1{top:14%;left:10%;animation-delay:.25s}
+.pre-splash-deco .d2{top:20%;right:12%;animation-delay:.55s}
+.pre-splash-deco .d3{bottom:24%;left:8%;animation-delay:.85s}
+.pre-splash-deco .d4{bottom:16%;right:9%;animation-delay:.4s}
+.pre-splash-deco .d5{top:45%;left:5%;animation-delay:1.1s}
+.pre-splash-deco .d6{top:50%;right:6%;animation-delay:.7s}
+@keyframes decoFloat{
+  0%{opacity:0;transform:translateY(26px) scale(.6)}
+  25%{opacity:1}
+  75%{opacity:1;transform:translateY(-10px) scale(1)}
+  100%{opacity:0;transform:translateY(-42px) scale(1.08)}
+}
+
+.splash-pending{display:none !important}
+
 .splash-rings{
   width:240px;max-width:60vw;margin:0 auto 32px;
   opacity:0;
@@ -1729,8 +1784,35 @@ body.splash-on{overflow:hidden;height:100vh}
 </head>
 <body>
 
+<!-- ============== PRE-SPLASH IMAGE ============== -->
+<div id="preSplash" class="pre-splash">
+  <img src="image-animation.jpeg" alt="Maeva &amp; Felix">
+  <div class="pre-splash-deco">
+    <span class="deco heart d1">❤</span>
+    <svg class="deco ring-icon d2" viewBox="0 0 40 26" aria-hidden="true">
+      <defs>
+        <linearGradient id="goldgradDeco2" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#A87E1F"/><stop offset="50%" stop-color="#F4C76A"/><stop offset="100%" stop-color="#E5A93C"/>
+        </linearGradient>
+      </defs>
+      <circle cx="14" cy="13" r="10" fill="none" stroke="url(#goldgradDeco2)" stroke-width="2"/>
+      <circle cx="26" cy="13" r="10" fill="none" stroke="url(#goldgradDeco2)" stroke-width="2"/>
+    </svg>
+    <span class="deco heart d3">❤</span>
+    <svg class="deco ring-icon d4" viewBox="0 0 40 26" aria-hidden="true">
+      <circle cx="14" cy="13" r="10" fill="none" stroke="url(#goldgradDeco2)" stroke-width="2"/>
+      <circle cx="26" cy="13" r="10" fill="none" stroke="url(#goldgradDeco2)" stroke-width="2"/>
+    </svg>
+    <span class="deco heart d5">❤</span>
+    <svg class="deco ring-icon d6" viewBox="0 0 40 26" aria-hidden="true">
+      <circle cx="14" cy="13" r="10" fill="none" stroke="url(#goldgradDeco2)" stroke-width="2"/>
+      <circle cx="26" cy="13" r="10" fill="none" stroke="url(#goldgradDeco2)" stroke-width="2"/>
+    </svg>
+  </div>
+</div>
+
 <!-- ============== SPLASH INTRO ============== -->
-<div id="splash" class="splash">
+<div id="splash" class="splash splash-pending">
   <div class="splash-aurora"></div>
   <div class="splash-feathers">
     <span class="ft ft-1">❦</span>
@@ -2349,31 +2431,48 @@ function safeSessionRemove(key){
 
 /* ============== SPLASH INTRO ============== */
 // Filet de sécurité : quoi qu'il arrive, l'écran de présentation disparaît
-// après 8s. Il ne doit jamais rester bloqué à l'écran.
+// après 11s. Il ne doit jamais rester bloqué à l'écran.
 setTimeout(function(){
+  const p = document.getElementById('preSplash');
+  if(p) p.remove();
   const s = document.getElementById('splash');
   if(s && !s.classList.contains('gone')) s.remove();
-}, 8000);
+}, 11000);
 
 (function initSplash(){
   const splash = document.getElementById('splash');
+  const pre = document.getElementById('preSplash');
   if(!splash) return;
   try{
     // Skip splash on organizer screen
     if(new URLSearchParams(window.location.search).get('organisateur') === '1'){
       splash.remove();
-      return;
-    }
-    // Show only once per session
-    if(safeSessionGet('splash_shown') === '1'){
-      splash.remove();
+      if(pre) pre.remove();
       return;
     }
     document.body.classList.add('splash-on');
-    // Auto-dismiss after ~4.6s (after all animations complete)
-    setTimeout(dismissSplash, 4600);
+
+    function revealSplash(){
+      splash.classList.remove('splash-pending');
+      // Auto-dismiss after ~4.6s (after all animations complete)
+      setTimeout(dismissSplash, 4600);
+    }
+
+    if(pre){
+      // L'image plein écran reste visible ~2s puis s'efface en fondu
+      // enchaîné directement sur l'animation des anneaux/prénoms, qui
+      // démarre au même instant en dessous (pas de flash du site brut).
+      setTimeout(()=>{
+        revealSplash();
+        pre.classList.add('pre-splash-out');
+        setTimeout(()=>{ pre.remove(); }, 950);
+      }, 2000);
+    } else {
+      revealSplash();
+    }
   } catch(e){
     console.warn('[SPLASH] erreur, affichage direct du site', e);
+    if(pre) pre.remove();
     splash.remove();
   }
 })();
@@ -2382,7 +2481,6 @@ function dismissSplash(){
   const splash = document.getElementById('splash');
   if(!splash) return;
   splash.classList.add('gone');
-  safeSessionSet('splash_shown','1');
   setTimeout(()=>{
     splash.remove();
     document.body.classList.remove('splash-on');
@@ -2967,7 +3065,7 @@ async function downloadPDF(){
 
     // ===== Selfie (réduit pour faire place au déroulé) =====
     y += 3;
-    const SELFIE_SIZE = 32;
+    const SELFIE_SIZE = 30;
     let nameY = y + 6;
     if(currentInvite.selfie_url){
       try{
@@ -3002,7 +3100,7 @@ async function downloadPDF(){
     doc.setFont('courier','bold');
     doc.setFontSize(9);
     const codeW = doc.getTextWidth(codeText) + 5;
-    const codeBoxY = nameY + 6;
+    const codeBoxY = nameY + 5;
     if(hasTable){
       const tableText = 'TABLE : ' + currentInvite.table_nom.trim().toUpperCase();
       // Réduit progressivement la police si le texte est trop long pour la place disponible
@@ -3044,7 +3142,7 @@ async function downloadPDF(){
     }
 
     // ===== DÉROULÉ DE LA JOURNÉE (avec heures + lieux clairs) =====
-    let dy = codeBoxY + 9;
+    let dy = codeBoxY + 8;
     doc.setDrawColor(...GOLD);
     doc.setLineWidth(.15);
     doc.line(RX-26, dy, RX+26, dy);
@@ -3080,9 +3178,16 @@ async function downloadPDF(){
       lineY += 3.4;
     });
 
+    // ===== DRESS CODE =====
+    const dressY = lineY + 3.6;
+    doc.setTextColor(...GOLD_LIGHT);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(6.2);
+    doc.text('DRESS CODE : SMOKING · TENUE DE SOIRÉE', RX, dressY, {align:'center', charSpace:.25});
+
     // ===== QR code =====
-    const qrSize = 18;
-    const qrY = lineY + 4;
+    const qrSize = 17;
+    const qrY = dressY + 3.4;
     try{
       const qrDataUrl = await fetchQRAsDataUrl(currentInvite.code);
       doc.setFillColor(...CREAM);
@@ -3094,7 +3199,7 @@ async function downloadPDF(){
     }
 
     // ===== Notice cadeau =====
-    const ny = qrY + qrSize + 3;
+    const ny = qrY + qrSize + 2.5;
     doc.setFont('times','italic');
     doc.setFontSize(5.2);
     doc.setTextColor(...GOLD_LIGHT);
@@ -3104,7 +3209,7 @@ async function downloadPDF(){
       doc.text(line, RX, ny + i*2.4, {align:'center'});
     });
     // ===== Notice sécurité =====
-    const ny2 = ny + giftLines.length*2.4 + 2;
+    const ny2 = ny + giftLines.length*2.4 + 1.5;
     doc.setFont('helvetica','italic');
     doc.setFontSize(4.5);
     doc.setTextColor(...MUTE);
@@ -3116,7 +3221,7 @@ async function downloadPDF(){
     doc.setFont('helvetica','normal');
     doc.setFontSize(5);
     doc.setTextColor(...GOLD_LIGHT);
-    doc.text('MERCI & AMUSEZ-VOUS BIEN', RX, ny2 + noticeLines.length*2.2 + 1.8, {align:'center', charSpace:.45});
+    doc.text('MERCI & AMUSEZ-VOUS BIEN', RX, ny2 + noticeLines.length*2.2 + 1.6, {align:'center', charSpace:.45});
 
     doc.save(`Invitation_${currentInvite.nom.replace(/\s+/g,'_')}.pdf`);
   } catch(e){
@@ -3538,8 +3643,8 @@ function renderGuestsTable(invites){
         <td>${presBadge}</td>
         <td>
           ${i.code?`<button class="action-btn" onclick="copyLink('${i.code}')">📋 Lien</button>`:''}
-          ${i.code?`<button class="action-btn" onclick="shareWhatsApp('${i.code}','${escapeHtml(i.nom||'')}','${escapeHtml(i.telephone||'')}')">📱 WhatsApp</button>`:''}
-          <button class="action-btn danger" onclick="deleteGuest('${i.id}','${escapeHtml(i.nom||'')}')">Supprimer</button>
+          ${i.code?`<button class="action-btn" data-code="${i.code}" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" onclick="shareWhatsApp(this)">📱 WhatsApp</button>`:''}
+          <button class="action-btn danger" data-id="${i.id}" data-nom="${escapeHtml(i.nom||'')}" onclick="deleteGuest(this)">Supprimer</button>
         </td>
       </tr>
     `;
@@ -3776,7 +3881,7 @@ async function addGuest(){
         <div class="link-box">${link}</div>
         <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
           <button class="action-btn" onclick="copyLink('${code}')">📋 Copier le lien</button>
-          <button class="action-btn" onclick="shareWhatsApp('${code}','${escapeHtml(name)}','${escapeHtml(phone)}')">📱 WhatsApp</button>
+          <button class="action-btn" data-code="${code}" data-nom="${escapeHtml(name)}" data-tel="${escapeHtml(phone)}" onclick="shareWhatsApp(this)">📱 WhatsApp</button>
         </div>
       </div>
     `;
@@ -3814,7 +3919,18 @@ function updatePhoneHint(){
 }
 updatePhoneHint();
 
-function shareWhatsApp(code, name, phone){
+function shareWhatsApp(btnOrCode, maybeName, maybePhone){
+  // Accepte soit l'élément bouton (data-code/data-nom/data-tel), soit les
+  // arguments bruts (compat rétro). Passer par des data-attributes évite de
+  // casser le onclick inline quand le nom contient une apostrophe (ex: N'Guessan).
+  let code, name, phone;
+  if(btnOrCode instanceof HTMLElement){
+    code = btnOrCode.dataset.code;
+    name = btnOrCode.dataset.nom || '';
+    phone = btnOrCode.dataset.tel || '';
+  } else {
+    code = btnOrCode; name = maybeName || ''; phone = maybePhone || '';
+  }
   const link = `${window.location.origin}${window.location.pathname}?invite=${code}`;
   const msg = `Bonjour ${name},\n\nVous êtes cordialement invité(e) au mariage de Maeva & Felix le 01 août 2026.\n\nVoici votre invitation personnelle :\n${link}\n\nMerci de confirmer votre présence. 🦚`;
   const digits = (phone || '').replace(/[^0-9]/g, '');
@@ -3822,11 +3938,31 @@ function shareWhatsApp(code, name, phone){
   window.open(url,'_blank');
 }
 
-async function deleteGuest(id, name){
+async function deleteGuest(btnOrId, maybeName){
+  // Idem : accepte l'élément bouton (data-id/data-nom) pour éviter de casser
+  // le onclick inline avec des noms contenant une apostrophe.
+  let id, name;
+  if(btnOrId instanceof HTMLElement){
+    id = btnOrId.dataset.id;
+    name = btnOrId.dataset.nom || '';
+  } else {
+    id = btnOrId; name = maybeName || '';
+  }
   if(!confirm(`Supprimer définitivement ${name} ?`)) return;
-  await sbDelete('invites', `id=eq.${id}`);
-  toast('Invité supprimé');
-  loadDashboard();
+  try{
+    const res = await sbDelete('invites', `id=eq.${id}`);
+    if(!res.ok){
+      const errTxt = await res.text().catch(()=>'');
+      console.error('[DELETE] échec', res.status, errTxt);
+      toast('Erreur lors de la suppression : '+res.status);
+      return;
+    }
+    toast('Invité supprimé');
+    loadDashboard();
+  } catch(e){
+    console.error('[DELETE] erreur réseau', e);
+    toast('Erreur réseau lors de la suppression');
+  }
 }
 
 /* ============== QR SCANNER ============== */
