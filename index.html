@@ -1037,6 +1037,36 @@ body.gate-open .nav{display:none}
   font-size:11px;letter-spacing:.32em;
   color:rgba(255,255,255,.75);
 }
+.pass-table{
+  display:inline-block;margin-top:14px;
+  padding:7px 20px;
+  border:1px solid rgba(244,199,106,.5);
+  border-radius:60px;
+  font-family:'Cinzel',serif;font-size:11px;letter-spacing:.22em;
+  color:var(--gold-light);
+  background:rgba(244,199,106,.08);
+}
+.card-lock-notice{
+  max-width:360px;margin:24px auto 0;
+  padding:20px 22px;
+  border:1px solid rgba(244,199,106,.3);
+  border-radius:14px;
+  background:rgba(255,255,255,.03);
+  text-align:center;
+}
+.card-lock-text{
+  font-size:13px;line-height:1.6;
+  color:rgba(255,255,255,.75);
+  margin-bottom:10px;
+}
+.card-lock-date{
+  font-family:'Cinzel',serif;font-size:13px;letter-spacing:.2em;
+  color:var(--gold-light);margin-bottom:8px;
+}
+.card-lock-countdown{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:16px;color:var(--paper);
+}
 .rsvp-notice{
   margin:24px auto 0;
   max-width:440px;
@@ -1211,6 +1241,21 @@ footer{
   border:1px solid rgba(244,199,106,.2);
   border-radius:var(--radius);
   padding:24px;text-align:center;
+  cursor:pointer;transition:all .2s;
+}
+.stat-card:hover{background:rgba(244,199,106,.1);border-color:var(--gold-light);transform:translateY(-2px)}
+.stat-card.active-filter{background:rgba(244,199,106,.16);border-color:var(--gold-light);box-shadow:0 4px 16px rgba(244,199,106,.2)}
+.active-filter-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  margin-bottom:14px;padding:6px 14px;
+  background:rgba(244,199,106,.14);border:1px solid rgba(244,199,106,.4);
+  border-radius:60px;
+  font-family:'Cinzel',serif;font-size:10px;letter-spacing:.15em;
+  color:var(--gold-light);
+}
+.active-filter-badge button{
+  background:none;border:none;color:var(--gold-light);cursor:pointer;
+  font-size:13px;line-height:1;padding:0 2px;
 }
 .stat-num{
   font-family:'Cormorant Garamond',serif;
@@ -1368,7 +1413,7 @@ footer{
 .action-btn.sent{background:rgba(123,197,142,.15);border-color:var(--mint);color:var(--mint)}
 .action-btn.sent:hover{background:rgba(123,197,142,.28);border-color:var(--mint);color:var(--mint)}
 
-.phone-edit-input{
+.phone-edit-input,.table-edit-input{
   background:transparent;
   border:1px solid transparent;
   border-radius:6px;
@@ -1378,9 +1423,10 @@ footer{
   width:150px;max-width:100%;
   transition:all .2s;
 }
-.phone-edit-input:hover{border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.04)}
-.phone-edit-input:focus{outline:none;border-color:var(--gold);background:rgba(255,255,255,.06)}
-.phone-edit-input::placeholder{color:rgba(255,255,255,.35)}
+.phone-edit-input:hover,.table-edit-input:hover{border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.04)}
+.phone-edit-input:focus,.table-edit-input:focus{outline:none;border-color:var(--gold);background:rgba(255,255,255,.06)}
+.phone-edit-input::placeholder,.table-edit-input::placeholder{color:rgba(255,255,255,.35)}
+.table-edit-input{width:110px}
 
 .link-box{
   background:rgba(0,0,0,.25);padding:12px 14px;border-radius:8px;
@@ -2026,13 +2072,19 @@ body.splash-on{overflow:hidden;height:100vh}
           <div class="qr-code-text" id="qr-code-text">—</div>
         </div>
         <div class="pass-date">Samedi 01 août 2026 · 13h30</div>
+        <div class="pass-table hidden" id="pass-table">Table : <span id="pass-table-name">—</span></div>
         <div class="rsvp-notice">
           <p>La carte d'invitation est strictement individuelle et nominative.</p>
           <p>Elle doit être obligatoirement présentée aux agents de sécurité pour accéder au lieu de réception.</p>
           <p class="rsvp-notice-end">Merci pour votre compréhension et amusez-vous bien !</p>
         </div>
         <br>
-        <button class="btn-outline" onclick="downloadPDF()">
+        <div class="card-lock-notice hidden" id="card-lock-notice">
+          <p class="card-lock-text">Le plan de table est en cours de finalisation.<br>Votre carte définitive sera disponible au téléchargement à partir du</p>
+          <p class="card-lock-date">20 juillet 2026</p>
+          <p class="card-lock-countdown" id="card-lock-countdown">—</p>
+        </div>
+        <button class="btn-outline hidden" id="btn-download" onclick="downloadPDF()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
           Télécharger
         </button>
@@ -2272,11 +2324,11 @@ body.splash-on{overflow:hidden;height:100vh}
     </div>
 
     <div class="stats-grid">
-      <div class="stat-card"><div class="stat-num" id="st-total">0</div><div class="stat-label">Total invités</div></div>
-      <div class="stat-card"><div class="stat-num" id="st-confirmed">0</div><div class="stat-label">Confirmés</div></div>
-      <div class="stat-card"><div class="stat-num" id="st-pending">0</div><div class="stat-label">En attente</div></div>
-      <div class="stat-card"><div class="stat-num" id="st-entered">0</div><div class="stat-label">Présents</div></div>
-      <div class="stat-card"><div class="stat-num" id="st-reconfirmed">0</div><div class="stat-label">Reconfirmés</div></div>
+      <div class="stat-card" id="stat-card-total" onclick="filterByStat(null)"><div class="stat-num" id="st-total">0</div><div class="stat-label">Total invités</div></div>
+      <div class="stat-card" id="stat-card-confirme" onclick="filterByStat('confirme')"><div class="stat-num" id="st-confirmed">0</div><div class="stat-label">Confirmés</div></div>
+      <div class="stat-card" id="stat-card-en_attente" onclick="filterByStat('en_attente')"><div class="stat-num" id="st-pending">0</div><div class="stat-label">En attente</div></div>
+      <div class="stat-card" id="stat-card-entre" onclick="filterByStat('entre')"><div class="stat-num" id="st-entered">0</div><div class="stat-label">Présents</div></div>
+      <div class="stat-card" id="stat-card-reconfirme" onclick="filterByStat('reconfirme')"><div class="stat-num" id="st-reconfirmed">0</div><div class="stat-label">Reconfirmés</div></div>
     </div>
 
     <div class="org-tabs">
@@ -2332,6 +2384,10 @@ body.splash-on{overflow:hidden;height:100vh}
       </div>
       <div id="phone-hint" class="phone-hint"></div>
       <div id="new-link-result" class="hidden"></div>
+      <div id="active-filter-badge" class="active-filter-badge hidden" style="margin-top:24px">
+        Filtre actif : <span id="active-filter-label">—</span>
+        <button onclick="filterByStat(null)" title="Retirer le filtre">✕</button>
+      </div>
       <div class="search-bar" style="margin-top:24px">
         <input id="guests-search" type="text" placeholder="Rechercher un invité…" oninput="filterGuests()">
       </div>
@@ -2385,7 +2441,7 @@ body.splash-on{overflow:hidden;height:100vh}
         <label class="manual-code-label">Message (modifiable — {nom} = prénom de l'invité, {lien} = son lien personnel de confirmation)</label>
         <textarea id="notif-message" rows="7">Bonjour {nom},
 
-Petit rappel amical : merci de confirmer (ou de modifier) votre présence via votre lien personnel, cela nous aide beaucoup pour l'organisation :
+Nous finalisons le plan de table ! Merci de reconfirmer votre présence via votre lien personnel — vous pourrez ensuite télécharger votre carte d'invitation définitive (avec votre table) :
 {lien}
 
 Nous avons hâte de vous voir ! 🌺</textarea>
@@ -2395,7 +2451,7 @@ Nous avons hâte de vous voir ! 🌺</textarea>
       </div>
       <div style="overflow-x:auto;margin-top:16px">
         <table class="guests-table">
-          <thead><tr><th>Nom</th><th>Téléphone</th><th>Statut RSVP</th><th>Notification</th></tr></thead>
+          <thead><tr><th>Nom</th><th>Table</th><th>Téléphone</th><th>Statut RSVP</th><th>Notification</th></tr></thead>
           <tbody id="notif-tbody"></tbody>
         </table>
       </div>
@@ -2749,6 +2805,33 @@ function showConfirmedView(){
   $('qr-code-text').textContent = currentInvite.code;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(currentInvite.code)}&color=0A2540&bgcolor=FAF8F2&format=png&margin=10`;
   $('qr-img').src = qrUrl;
+  const tableNom = (currentInvite.table_nom || '').trim();
+  if(tableNom){
+    $('pass-table-name').textContent = tableNom.toUpperCase();
+    show('pass-table');
+  } else {
+    hide('pass-table');
+  }
+  updateCardLockUI();
+}
+
+// Le temps de finaliser le plan de table, le téléchargement de la carte
+// définitive n'est débloqué qu'à partir de cette date.
+const CARD_UNLOCK_DATE = new Date('2026-07-20T00:00:00Z');
+function updateCardLockUI(){
+  const now = new Date();
+  if(now >= CARD_UNLOCK_DATE){
+    hide('card-lock-notice');
+    show('btn-download');
+    return;
+  }
+  hide('btn-download');
+  show('card-lock-notice');
+  const msDiff = CARD_UNLOCK_DATE - now;
+  const days = Math.ceil(msDiff / 86400000);
+  $('card-lock-countdown').textContent = days <= 1
+    ? 'Disponible demain'
+    : `Encore ${days} jours`;
 }
 
 function showReconfirmGate(){
@@ -3628,7 +3711,7 @@ async function loadDashboard(){
   $('st-pending').textContent = invites.filter(i=>i.statut==='en_attente').length;
   $('st-entered').textContent = invites.filter(i=>i.presence==='entre').length;
   $('st-reconfirmed').textContent = invites.filter(i=>i.statut==='confirme' && i.reconfirme).length;
-  renderGuestsTable(invites);
+  filterGuests();
 }
 
 function renderGuestsTable(invites){
@@ -3652,7 +3735,10 @@ function renderGuestsTable(invites){
     return `
       <tr>
         <td><strong>${escapeHtml(i.nom||'')}</strong></td>
-        <td>${escapeHtml(i.table_nom||'—')}</td>
+        <td>
+          <input type="text" class="table-edit-input" data-id="${i.id}" value="${escapeHtml(i.table_nom||'')}" placeholder="—" onblur="saveTableEdit(this)" onkeydown="if(event.key==='Enter')this.blur()">
+          ${(i.table_nom && i.table_nom.trim() && i.statut!=='confirme') ? `<span title="Table attribuée mais présence non confirmée" style="cursor:help">⚠️</span>` : ''}
+        </td>
         <td><input type="tel" inputmode="tel" class="phone-edit-input" data-id="${i.id}" value="${escapeHtml(i.telephone||'')}" placeholder="+225…" onblur="savePhoneEdit(this)" onkeydown="if(event.key==='Enter')this.blur()"></td>
         <td><code style="font-size:12px;color:var(--gold-light)">${escapeHtml(i.code||'—')}</code></td>
         <td>${statutBadge}</td>
@@ -3660,6 +3746,7 @@ function renderGuestsTable(invites){
         <td>
           ${i.code?`<button class="action-btn" onclick="copyLink('${i.code}')">📋 Lien</button>`:''}
           ${i.code?`<button class="action-btn${i.notifie?' sent':''}" data-id="${i.id}" data-code="${i.code}" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" onclick="shareWhatsApp(this)">${i.notifie?'✓ Envoyé — Renvoyer':'📱 WhatsApp'}</button>`:''}
+          ${(i.statut==='confirme' && i.code && i.table_nom && i.table_nom.trim()) ? `<button class="action-btn" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" data-table="${escapeHtml(i.table_nom||'')}" data-code="${i.code}" onclick="notifyTable(this)">🍽️ Prévenir de sa table</button>` : ''}
           <button class="action-btn danger" data-id="${i.id}" data-nom="${escapeHtml(i.nom||'')}" onclick="deleteGuest(this)">Supprimer</button>
         </td>
       </tr>
@@ -3667,14 +3754,49 @@ function renderGuestsTable(invites){
   }).join('');
 }
 
+let quickFilter = null; // null | 'confirme' | 'en_attente' | 'entre' | 'reconfirme'
+
 function filterGuests(){
   const q = ($('guests-search').value || '').trim().toLowerCase();
-  if(!q){ renderGuestsTable(allInvites); return; }
-  const filtered = allInvites.filter(i=>
-    (i.nom||'').toLowerCase().includes(q) ||
-    (i.table_nom||'').toLowerCase().includes(q)
-  );
-  renderGuestsTable(filtered);
+  let list = allInvites;
+  if(quickFilter === 'confirme') list = list.filter(i=>i.statut==='confirme');
+  else if(quickFilter === 'en_attente') list = list.filter(i=>i.statut==='en_attente');
+  else if(quickFilter === 'entre') list = list.filter(i=>i.presence==='entre');
+  else if(quickFilter === 'reconfirme') list = list.filter(i=>i.statut==='confirme' && i.reconfirme);
+  if(q){
+    list = list.filter(i=>
+      (i.nom||'').toLowerCase().includes(q) ||
+      (i.table_nom||'').toLowerCase().includes(q)
+    );
+  }
+  renderGuestsTable(list);
+}
+
+const QUICK_FILTER_LABELS = { confirme:'Confirmés', en_attente:'En attente', entre:'Présents', reconfirme:'Reconfirmés' };
+
+function filterByStat(type){
+  quickFilter = type;
+  const invitesTabBtn = document.querySelector('.org-tab[onclick*="\'invites\'"]');
+  showTab('invites', invitesTabBtn);
+  const search = $('guests-search');
+  if(search) search.value = '';
+
+  document.querySelectorAll('.stat-card').forEach(c=>c.classList.remove('active-filter'));
+  const cardId = type ? 'stat-card-'+type : 'stat-card-total';
+  const card = $(cardId);
+  if(card) card.classList.add('active-filter');
+
+  const badge = $('active-filter-badge');
+  if(type && QUICK_FILTER_LABELS[type]){
+    $('active-filter-label').textContent = QUICK_FILTER_LABELS[type];
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+
+  filterGuests();
+  const panel = $('tab-invites');
+  if(panel) panel.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 const COUNTRY_CODES = [
@@ -3720,7 +3842,7 @@ function renderNotifList(){
   let list = allInvites;
   if(q) list = list.filter(i => (i.nom||'').toLowerCase().includes(q));
   if(list.length===0){
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,.5);font-style:italic;padding:30px">Aucun invité.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:rgba(255,255,255,.5);font-style:italic;padding:30px">Aucun invité.</td></tr>';
     return;
   }
   tbody.innerHTML = list.map(i=>{
@@ -3744,9 +3866,14 @@ function renderNotifList(){
       const btnLabel = notified ? '✓ Notifié — Renvoyer' : '📱 Envoyer';
       actionCell = `<button class="${btnClass}" onclick="sendNotification('${i.id}')">${btnLabel}</button>`;
     }
+    const tableCell = `
+      <input type="text" class="table-edit-input" data-id="${i.id}" value="${escapeHtml(i.table_nom||'')}" placeholder="—" onblur="saveTableEdit(this)" onkeydown="if(event.key==='Enter')this.blur()">
+      ${(i.table_nom && i.table_nom.trim() && i.statut!=='confirme') ? `<span title="Table attribuée mais présence non confirmée" style="cursor:help">⚠️</span>` : ''}
+    `;
     return `
       <tr>
         <td><strong>${escapeHtml(i.nom||'')}</strong></td>
+        <td>${tableCell}</td>
         <td>${escapeHtml(i.telephone||'—')}</td>
         <td>${statutBadge}</td>
         <td>${actionCell}</td>
@@ -3804,12 +3931,19 @@ function renderTablesView(){
   if(!wrap) return;
   const q = ($('tables-search')?.value || '').trim().toLowerCase();
 
+  // Le plan de table ne concerne que les invités confirmés : on ne peut pas
+  // asseoir quelqu'un qui n'a pas confirmé (ou a décliné) sa présence.
+  const confirmed = allInvites.filter(i => i.statut === 'confirme');
+  const notConfirmedCount = allInvites.length - confirmed.length;
+  const withTable = confirmed.filter(i => (i.table_nom||'').trim());
+  const withoutTable = confirmed.filter(i => !(i.table_nom||'').trim());
+
   // Regroupement insensible à la casse (clé normalisée en minuscules)
   const groups = {};
-  allInvites.forEach(i=>{
-    const label = (i.table_nom||'').trim();
-    const key = label ? label.toLowerCase() : '__sans_table__';
-    if(!groups[key]) groups[key] = { label: label || 'Sans table assignée', guests: [] };
+  withTable.forEach(i=>{
+    const label = i.table_nom.trim();
+    const key = label.toLowerCase();
+    if(!groups[key]) groups[key] = { label, guests: [] };
     groups[key].guests.push(i);
   });
 
@@ -3819,19 +3953,36 @@ function renderTablesView(){
   }
   entries.sort((a,b)=> a.label.localeCompare(b.label, 'fr', {numeric:true}));
 
-  if(entries.length===0){
-    wrap.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,.5);font-style:italic;padding:30px">Aucune table trouvée.</p>';
-    return;
+  let html = `<p style="color:rgba(255,255,255,.6);font-size:13px;margin-bottom:18px;line-height:1.6">
+    Le plan de table n'inclut que les invités <strong style="color:var(--mint)">confirmés</strong>.
+    ${notConfirmedCount>0 ? `${notConfirmedCount} invité(s) en attente de réponse ou ayant décliné ne sont pas repris ci-dessous.` : 'Tous les invités ont répondu.'}
+  </p>`;
+
+  if(withoutTable.length > 0 && !q){
+    html += `
+      <div class="table-group-card" style="border-color:rgba(244,199,106,.45)">
+        <div class="table-group-title">⚠️ Confirmés sans table assignée <span class="table-group-count">${withoutTable.length}</span></div>
+        <ul class="table-group-list">
+          ${withoutTable.map(gu => `<li>${escapeHtml(gu.nom||'')}</li>`).join('')}
+        </ul>
+      </div>
+    `;
   }
 
-  wrap.innerHTML = entries.map(g => `
-    <div class="table-group-card">
-      <div class="table-group-title">${escapeHtml(g.label)} <span class="table-group-count">${g.guests.length}</span></div>
-      <ul class="table-group-list">
-        ${g.guests.map(gu => `<li>${escapeHtml(gu.nom||'')}</li>`).join('')}
-      </ul>
-    </div>
-  `).join('');
+  if(entries.length===0){
+    html += '<p style="text-align:center;color:rgba(255,255,255,.5);font-style:italic;padding:30px">Aucune table attribuée pour le moment.</p>';
+  } else {
+    html += entries.map(g => `
+      <div class="table-group-card">
+        <div class="table-group-title">${escapeHtml(g.label)} <span class="table-group-count">${g.guests.length}</span></div>
+        <ul class="table-group-list">
+          ${g.guests.map(gu => `<li>${escapeHtml(gu.nom||'')}</li>`).join('')}
+        </ul>
+      </div>
+    `).join('');
+  }
+
+  wrap.innerHTML = html;
 }
 
 async function addGuest(){
@@ -3956,6 +4107,21 @@ function shareWhatsApp(btnOrCode, maybeName, maybePhone){
   if(id) markNotified(id);
 }
 
+function notifyTable(btn){
+  // Notifie un invité déjà confirmé que sa table a été attribuée (ou modifiée),
+  // et l'invite à retélécharger sa carte à jour. Pas de suivi persistant en
+  // base : action ponctuelle, à utiliser au moment de dresser le plan de table.
+  const name = btn.dataset.nom || '';
+  const phone = btn.dataset.tel || '';
+  const table = (btn.dataset.table || '').toUpperCase();
+  const code = btn.dataset.code || '';
+  const link = `${window.location.origin}${window.location.pathname}?invite=${code}`;
+  const msg = `Bonjour ${name},\n\nVotre table pour le mariage a été attribuée : ${table}.\n\nMerci de retélécharger votre carte d'invitation mise à jour via votre lien personnel :\n${link}\n\nÀ très bientôt ! 🦚`;
+  const digits = (phone || '').replace(/[^0-9]/g, '');
+  const url = digits ? `https://wa.me/${digits}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(url,'_blank');
+}
+
 async function markNotified(id){
   // Marque l'invité comme notifié pour éviter de renvoyer l'invitation par
   // erreur. Le bouton reste cliquable (renvoi volontaire toujours possible).
@@ -3986,6 +4152,26 @@ async function savePhoneEdit(input){
     console.error('[PHONE] erreur maj', e);
     toast('Erreur lors de la mise à jour du numéro');
     input.value = guest.telephone || '';
+  }
+}
+
+async function saveTableEdit(input){
+  const id = input.dataset.id;
+  const guest = allInvites.find(i=>i.id===id);
+  if(!guest) return;
+  const newTable = input.value.trim();
+  if(newTable === (guest.table_nom||'')) return;
+  try{
+    await sbPatch('invites', `id=eq.${id}`, {table_nom: newTable || null});
+    guest.table_nom = newTable;
+    toast('Table mise à jour');
+    filterGuests();
+    if(typeof renderTablesView === 'function') renderTablesView();
+    if(typeof renderNotifList === 'function') renderNotifList();
+  } catch(e){
+    console.error('[TABLE] erreur maj', e);
+    toast('Erreur lors de la mise à jour de la table');
+    input.value = guest.table_nom || '';
   }
 }
 
