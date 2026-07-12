@@ -38,7 +38,7 @@
 
   /* Neutres */
   --cream:#FAF8F2;
-  --paper:#FFFFFF;
+  --paper:#E9E9E9;
   --ink:#1A1F2E;
   --ink-soft:#4B5563;
   --mute:#9AA3AF;
@@ -543,8 +543,12 @@ section.page-section{padding:90px 24px}
   line-height:1.7;
 }
 @media (max-width:480px){
-  .contrib-list{gap:18px 8px}
+  .contrib-list{
+    grid-template-columns:repeat(2,1fr);
+    gap:24px 12px;
+  }
   .contrib-list li{font-size:17px}
+  .contrib-list li:last-child{grid-column:1 / -1}
   .contrib-detail{font-size:11px}
 }
 
@@ -3768,7 +3772,7 @@ function renderGuestsTable(invites){
         <td>
           ${i.code?`<button class="action-btn" onclick="copyLink('${i.code}')">📋 Lien</button>`:''}
           ${i.code?`<button class="action-btn${i.notifie?' sent':''}" data-id="${i.id}" data-code="${i.code}" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" onclick="shareWhatsApp(this)">${i.notifie?'✓ Envoyé — Renvoyer':'📱 WhatsApp'}</button>`:''}
-          ${i.code?`<button class="action-btn" data-id="${i.id}" data-code="${i.code}" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" onclick="shareSMS(this)">✉️ SMS</button>`:''}
+          ${i.code?`<button class="action-btn${i.notifie?' sent':''}" data-id="${i.id}" data-code="${i.code}" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" onclick="shareSMS(this)">${i.notifie?'✓ Envoyé — Renvoyer':'✉️ SMS'}</button>`:''}
           ${(i.statut==='confirme' && i.code && i.table_nom && i.table_nom.trim()) ? `<button class="action-btn" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" data-table="${escapeHtml(i.table_nom||'')}" data-code="${i.code}" onclick="notifyTable(this)">🍽️ Prévenir de sa table</button>` : ''}
           ${(i.statut==='confirme' && i.code && i.table_nom && i.table_nom.trim()) ? `<button class="action-btn" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" data-table="${escapeHtml(i.table_nom||'')}" data-code="${i.code}" onclick="notifyTableSMS(this)">✉️ SMS table</button>` : ''}
           <button class="action-btn danger" data-id="${i.id}" data-nom="${escapeHtml(i.nom||'')}" onclick="deleteGuest(this)">Supprimer</button>
@@ -3888,7 +3892,9 @@ function renderNotifList(){
     } else {
       const btnClass = notified ? 'notif-btn notif-btn-red' : 'notif-btn notif-btn-green';
       const btnLabel = notified ? '✓ Notifié — Renvoyer' : '📱 Envoyer';
-      actionCell = `<button class="${btnClass}" onclick="sendNotification('${i.id}')">${btnLabel}</button> <button class="notif-btn notif-btn-blue" onclick="sendNotificationSMS('${i.id}')">✉️ SMS</button>`;
+      const smsBtnClass = notified ? 'notif-btn notif-btn-red' : 'notif-btn notif-btn-blue';
+      const smsBtnLabel = notified ? '✓ Notifié — Renvoyer' : '✉️ SMS';
+      actionCell = `<button class="${btnClass}" onclick="sendNotification('${i.id}')">${btnLabel}</button> <button class="${smsBtnClass}" onclick="sendNotificationSMS('${i.id}')">${smsBtnLabel}</button>`;
     }
     const tableCell = `
       <input type="text" class="table-edit-input" data-id="${i.id}" value="${escapeHtml(i.table_nom||'')}" placeholder="—" onblur="saveTableEdit(this)" onkeydown="if(event.key==='Enter')this.blur()">
