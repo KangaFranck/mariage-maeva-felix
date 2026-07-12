@@ -2342,6 +2342,9 @@ body.splash-on{overflow:hidden;height:100vh}
       <div class="stat-card" id="stat-card-en_attente" onclick="filterByStat('en_attente')"><div class="stat-num" id="st-pending">0</div><div class="stat-label">En attente</div></div>
       <div class="stat-card" id="stat-card-entre" onclick="filterByStat('entre')"><div class="stat-num" id="st-entered">0</div><div class="stat-label">Présents</div></div>
       <div class="stat-card" id="stat-card-reconfirme" onclick="filterByStat('reconfirme')"><div class="stat-num" id="st-reconfirmed">0</div><div class="stat-label">Reconfirmés</div></div>
+      <div class="stat-card" id="stat-card-notifie_whatsapp" onclick="filterByStat('notifie_whatsapp')"><div class="stat-num" id="st-whatsapp">0</div><div class="stat-label">Invités WhatsApp</div></div>
+      <div class="stat-card" id="stat-card-notifie_sms" onclick="filterByStat('notifie_sms')"><div class="stat-num" id="st-sms">0</div><div class="stat-label">Invités SMS</div></div>
+      <div class="stat-card" id="stat-card-decline" onclick="filterByStat('decline')"><div class="stat-num" id="st-declined">0</div><div class="stat-label">Déclinés</div></div>
     </div>
 
     <div class="org-tabs">
@@ -3737,6 +3740,9 @@ async function loadDashboard(){
   $('st-pending').textContent = invites.filter(i=>i.statut==='en_attente').length;
   $('st-entered').textContent = invites.filter(i=>i.presence==='entre').length;
   $('st-reconfirmed').textContent = invites.filter(i=>i.statut==='confirme' && i.reconfirme).length;
+  $('st-whatsapp').textContent = invites.filter(i=>i.notifie_whatsapp).length;
+  $('st-sms').textContent = invites.filter(i=>i.notifie_sms).length;
+  $('st-declined').textContent = invites.filter(i=>i.statut==='decline').length;
   filterGuests();
 }
 
@@ -3771,8 +3777,8 @@ function renderGuestsTable(invites){
         <td>${presBadge}</td>
         <td>
           ${i.code?`<button class="action-btn" onclick="copyLink('${i.code}')">📋 Lien</button>`:''}
-          ${i.code?`<button class="action-btn${i.notifie?' sent':''}" data-id="${i.id}" data-code="${i.code}" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" onclick="shareWhatsApp(this)">${i.notifie?'✓ Envoyé — Renvoyer':'📱 WhatsApp'}</button>`:''}
-          ${i.code?`<button class="action-btn${i.notifie?' sent':''}" data-id="${i.id}" data-code="${i.code}" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" onclick="shareSMS(this)">${i.notifie?'✓ Envoyé — Renvoyer':'✉️ SMS'}</button>`:''}
+          ${i.code?`<button class="action-btn${i.notifie_whatsapp?' sent':''}" data-id="${i.id}" data-code="${i.code}" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" onclick="shareWhatsApp(this)">${i.notifie_whatsapp?'✓ Envoyé WhatsApp':'📱 WhatsApp'}</button>`:''}
+          ${i.code?`<button class="action-btn${i.notifie_sms?' sent':''}" data-id="${i.id}" data-code="${i.code}" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" onclick="shareSMS(this)">${i.notifie_sms?'✓ Envoyé SMS':'✉️ SMS'}</button>`:''}
           ${(i.statut==='confirme' && i.code && i.table_nom && i.table_nom.trim()) ? `<button class="action-btn" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" data-table="${escapeHtml(i.table_nom||'')}" data-code="${i.code}" onclick="notifyTable(this)">🍽️ Prévenir de sa table</button>` : ''}
           ${(i.statut==='confirme' && i.code && i.table_nom && i.table_nom.trim()) ? `<button class="action-btn" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" data-table="${escapeHtml(i.table_nom||'')}" data-code="${i.code}" onclick="notifyTableSMS(this)">✉️ SMS table</button>` : ''}
           <button class="action-btn danger" data-id="${i.id}" data-nom="${escapeHtml(i.nom||'')}" onclick="deleteGuest(this)">Supprimer</button>
@@ -3791,6 +3797,9 @@ function filterGuests(){
   else if(quickFilter === 'en_attente') list = list.filter(i=>i.statut==='en_attente');
   else if(quickFilter === 'entre') list = list.filter(i=>i.presence==='entre');
   else if(quickFilter === 'reconfirme') list = list.filter(i=>i.statut==='confirme' && i.reconfirme);
+  else if(quickFilter === 'notifie_whatsapp') list = list.filter(i=>i.notifie_whatsapp);
+  else if(quickFilter === 'notifie_sms') list = list.filter(i=>i.notifie_sms);
+  else if(quickFilter === 'decline') list = list.filter(i=>i.statut==='decline');
   if(q){
     list = list.filter(i=>
       (i.nom||'').toLowerCase().includes(q) ||
@@ -3800,7 +3809,7 @@ function filterGuests(){
   renderGuestsTable(list);
 }
 
-const QUICK_FILTER_LABELS = { confirme:'Confirmés', en_attente:'En attente', entre:'Présents', reconfirme:'Reconfirmés' };
+const QUICK_FILTER_LABELS = { confirme:'Confirmés', en_attente:'En attente', entre:'Présents', reconfirme:'Reconfirmés', notifie_whatsapp:'Invités WhatsApp', notifie_sms:'Invités SMS', decline:'Déclinés' };
 
 function filterByStat(type){
   quickFilter = type;
@@ -4153,7 +4162,7 @@ function shareWhatsApp(btnOrCode, maybeName, maybePhone){
   const digits = (phone || '').replace(/[^0-9]/g, '');
   const url = digits ? `https://wa.me/${digits}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
   window.open(url,'_blank');
-  if(id) markNotified(id);
+  if(id) markNotified(id, 'whatsapp');
 }
 
 // Construit un lien sms: pré-rempli (ouvre l'appli Messages native, sans passer
@@ -4179,7 +4188,7 @@ function shareSMS(btnOrCode, maybeName, maybePhone){
   const link = `${window.location.origin}${window.location.pathname}?invite=${code}`;
   const msg = `Bonjour ${name},\n\nVous êtes cordialement invité(e) au mariage civil de Maeva & Felix (Dr Kanga) le samedi 01 août 2026.\n\nVoici votre invitation personnelle :\n${link}\n\nMerci de confirmer votre présence en cliquant sur le lien.\n\nSi vous rencontrez des difficultés ou avez des questions, contactez ce numéro WhatsApp :\n+33 6 09 92 75 90\nhttps://wa.me/33609927590`;
   window.location.href = buildSmsUrl(phone, msg);
-  if(id) markNotified(id);
+  if(id) markNotified(id, 'sms');
 }
 
 function notifyTable(btn){
@@ -4208,13 +4217,18 @@ function notifyTableSMS(btn){
   window.location.href = buildSmsUrl(phone, msg);
 }
 
-async function markNotified(id){
+async function markNotified(id, channel){
   // Marque l'invité comme notifié pour éviter de renvoyer l'invitation par
   // erreur. Le bouton reste cliquable (renvoi volontaire toujours possible).
+  // channel: 'whatsapp' | 'sms' — permet de distinguer par quel canal l'invité
+  // a été contacté (deux invités "notifiés" peuvent l'avoir été différemment).
+  const patch = { notifie: true };
+  if(channel === 'whatsapp') patch.notifie_whatsapp = true;
+  if(channel === 'sms') patch.notifie_sms = true;
   try{
-    await sbPatch('invites', `id=eq.${id}`, {notifie:true});
+    await sbPatch('invites', `id=eq.${id}`, patch);
     const guest = allInvites.find(i=>i.id===id);
-    if(guest) guest.notifie = true;
+    if(guest) Object.assign(guest, patch);
     filterGuests();
     if(typeof renderNotifList === 'function') renderNotifList();
   } catch(e){
