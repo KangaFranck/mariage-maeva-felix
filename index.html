@@ -536,9 +536,16 @@ section.page-section{padding:90px 24px}
   background:var(--jade);
   flex:none;
 }
+.contrib-detail{
+  font-family:'Cinzel',serif;
+  font-size:12px;font-weight:400;letter-spacing:.03em;
+  color:var(--gold-light);
+  line-height:1.7;
+}
 @media (max-width:480px){
   .contrib-list{gap:18px 8px}
   .contrib-list li{font-size:17px}
+  .contrib-detail{font-size:11px}
 }
 
 /* ===============================================================
@@ -2138,9 +2145,9 @@ body.splash-on{overflow:hidden;height:100vh}
           <p>Votre présence sera notre plus beau cadeau. Toutefois, si vous souhaitez nous faire un don pour nous accompagner dans cette magnifique aventure, cela se fera uniquement par :</p>
         </div>
         <ol class="contrib-list">
-          <li>Wave</li>
-          <li>Orange Money</li>
-          <li>Virement bancaire</li>
+          <li>Wave<span class="contrib-detail">+225 07 07 95 00 95<br>+225 07 47 90 47 90</span></li>
+          <li>Orange Money<span class="contrib-detail">+225 07 07 95 00 95<br>+225 07 08 78 78 91</span></li>
+          <li>Virement bancaire<span class="contrib-detail">Code banque CI006 · Guichet 01753<br>Compte 011014260005 · Clé 41</span></li>
         </ol>
       </div>
     </div>
@@ -2441,7 +2448,7 @@ body.splash-on{overflow:hidden;height:100vh}
         <label class="manual-code-label">Message (modifiable — {nom} = prénom de l'invité, {lien} = son lien personnel de confirmation)</label>
         <textarea id="notif-message" rows="7">Bonjour {nom},
 
-Nous finalisons le plan de table ! Merci de reconfirmer votre présence via votre lien personnel — vous pourrez ensuite télécharger votre carte d'invitation définitive (avec votre table) :
+Nous finalisons le plan de table du mariage civil ! Merci de reconfirmer votre présence via votre lien personnel — vous pourrez ensuite télécharger votre carte d'invitation définitive (avec votre table) :
 {lien}
 
 Nous avons hâte de vous voir ! 🌺</textarea>
@@ -3298,29 +3305,39 @@ async function downloadPDF(){
     }
 
     // ===== Notice cadeau =====
-    const ny = qrY + qrSize + 2.5;
+    const ny = qrY + qrSize + 2.2;
     doc.setFont('times','italic');
     doc.setFontSize(5.2);
     doc.setTextColor(...GOLD_LIGHT);
-    const giftMsg = "Votre présence sera notre plus beau cadeau. Toutefois, si vous souhaitez nous faire un don pour nous accompagner dans cette magnifique aventure, cela se fera uniquement par : 1) Wave  2) Orange Money  3) Virement bancaire.";
+    const giftMsg = "Votre présence sera notre plus beau cadeau. Si vous souhaitez néanmoins nous faire un don, voici nos coordonnées :";
     const giftLines = doc.splitTextToSize(giftMsg, 92);
     giftLines.forEach((line, i) => {
-      doc.text(line, RX, ny + i*2.4, {align:'center'});
+      doc.text(line, RX, ny + i*2.3, {align:'center'});
+    });
+    // ===== Coordonnées de don (Wave / OM / RIB) =====
+    const nyPay = ny + giftLines.length*2.3 + 1.0;
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(4.4);
+    doc.setTextColor(...GOLD_LIGHT);
+    const payMsg = "Wave/OM : 07 07 95 00 95  ·  RIB : CI006 01753 011014260005 41";
+    const payLines = doc.splitTextToSize(payMsg, 96);
+    payLines.forEach((line, i) => {
+      doc.text(line, RX, nyPay + i*2.0, {align:'center'});
     });
     // ===== Notice sécurité =====
-    const ny2 = ny + giftLines.length*2.4 + 1.5;
+    const ny2 = nyPay + payLines.length*2.0 + 0.8;
     doc.setFont('helvetica','italic');
-    doc.setFontSize(4.5);
+    doc.setFontSize(4.3);
     doc.setTextColor(...MUTE);
-    const notice = "Carte strictement individuelle et nominative. À présenter aux agents de sécurité pour accéder au lieu de réception.";
-    const noticeLines = doc.splitTextToSize(notice, 92);
+    const notice = "Carte strictement individuelle et nominative. À présenter aux agents de sécurité.";
+    const noticeLines = doc.splitTextToSize(notice, 96);
     noticeLines.forEach((line, i) => {
-      doc.text(line, RX, ny2 + i*2.2, {align:'center'});
+      doc.text(line, RX, ny2 + i*2.0, {align:'center'});
     });
     doc.setFont('helvetica','normal');
     doc.setFontSize(5);
     doc.setTextColor(...GOLD_LIGHT);
-    doc.text('MERCI & AMUSEZ-VOUS BIEN', RX, ny2 + noticeLines.length*2.2 + 1.6, {align:'center', charSpace:.45});
+    doc.text('MERCI & AMUSEZ-VOUS BIEN', RX, ny2 + noticeLines.length*2.0 + 1.4, {align:'center', charSpace:.45});
 
     doc.save(`Invitation_${currentInvite.nom.replace(/\s+/g,'_')}.pdf`);
   } catch(e){
@@ -4100,7 +4117,7 @@ function shareWhatsApp(btnOrCode, maybeName, maybePhone){
     code = btnOrCode; name = maybeName || ''; phone = maybePhone || '';
   }
   const link = `${window.location.origin}${window.location.pathname}?invite=${code}`;
-  const msg = `Bonjour ${name},\n\nVous êtes cordialement invité(e) au mariage de Maeva & Felix le 01 août 2026.\n\nVoici votre invitation personnelle :\n${link}\n\nMerci de confirmer votre présence. 🦚`;
+  const msg = `Bonjour ${name},\n\nVous êtes cordialement invité(e) au mariage civil de Maeva & Felix le 01 août 2026.\n\nVoici votre invitation personnelle :\n${link}\n\nMerci de confirmer votre présence. 🦚`;
   const digits = (phone || '').replace(/[^0-9]/g, '');
   const url = digits ? `https://wa.me/${digits}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
   window.open(url,'_blank');
@@ -4116,7 +4133,7 @@ function notifyTable(btn){
   const table = (btn.dataset.table || '').toUpperCase();
   const code = btn.dataset.code || '';
   const link = `${window.location.origin}${window.location.pathname}?invite=${code}`;
-  const msg = `Bonjour ${name},\n\nVotre table pour le mariage a été attribuée : ${table}.\n\nMerci de retélécharger votre carte d'invitation mise à jour via votre lien personnel :\n${link}\n\nÀ très bientôt ! 🦚`;
+  const msg = `Bonjour ${name},\n\nVotre table pour le mariage civil a été attribuée : ${table}.\n\nMerci de retélécharger votre carte d'invitation mise à jour via votre lien personnel :\n${link}\n\nÀ très bientôt ! 🦚`;
   const digits = (phone || '').replace(/[^0-9]/g, '');
   const url = digits ? `https://wa.me/${digits}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
   window.open(url,'_blank');
