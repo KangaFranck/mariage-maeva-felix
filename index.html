@@ -1504,6 +1504,8 @@ footer{
 .notif-btn-green:hover{box-shadow:0 8px 20px rgba(63,168,92,.45)}
 .notif-btn-red{background:#D64545;box-shadow:0 4px 14px rgba(214,69,69,.35)}
 .notif-btn-red:hover{box-shadow:0 8px 20px rgba(214,69,69,.45)}
+.notif-btn-blue{background:#3A7BD5;box-shadow:0 4px 14px rgba(58,123,213,.35)}
+.notif-btn-blue:hover{box-shadow:0 8px 20px rgba(58,123,213,.45)}
 .notif-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
 
 .scan-mode-toggle{
@@ -2733,7 +2735,10 @@ async function loadInvite(code){
     }
     currentInvite = data[0];
     if(currentInvite.statut === 'confirme'){
-      if(!currentInvite.reconfirme){
+      // La reconfirmation ne doit être demandée qu'après l'envoi effectif du
+      // message de relance (onglet Notifications) — pas dès que l'invité
+      // rouvre son ancien lien avant que l'organisateur n'ait lancé cette phase.
+      if(currentInvite.relance_envoyee && !currentInvite.reconfirme){
         showReconfirmGate();
       } else {
         showConfirmedView();
@@ -3763,7 +3768,9 @@ function renderGuestsTable(invites){
         <td>
           ${i.code?`<button class="action-btn" onclick="copyLink('${i.code}')">📋 Lien</button>`:''}
           ${i.code?`<button class="action-btn${i.notifie?' sent':''}" data-id="${i.id}" data-code="${i.code}" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" onclick="shareWhatsApp(this)">${i.notifie?'✓ Envoyé — Renvoyer':'📱 WhatsApp'}</button>`:''}
+          ${i.code?`<button class="action-btn" data-id="${i.id}" data-code="${i.code}" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" onclick="shareSMS(this)">✉️ SMS</button>`:''}
           ${(i.statut==='confirme' && i.code && i.table_nom && i.table_nom.trim()) ? `<button class="action-btn" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" data-table="${escapeHtml(i.table_nom||'')}" data-code="${i.code}" onclick="notifyTable(this)">🍽️ Prévenir de sa table</button>` : ''}
+          ${(i.statut==='confirme' && i.code && i.table_nom && i.table_nom.trim()) ? `<button class="action-btn" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" data-table="${escapeHtml(i.table_nom||'')}" data-code="${i.code}" onclick="notifyTableSMS(this)">✉️ SMS table</button>` : ''}
           <button class="action-btn danger" data-id="${i.id}" data-nom="${escapeHtml(i.nom||'')}" onclick="deleteGuest(this)">Supprimer</button>
         </td>
       </tr>
@@ -3867,7 +3874,7 @@ function renderNotifList(){
     if(i.statut==='confirme') statutBadge = '<span class="badge badge-confirmed">CONFIRMÉ</span>';
     else if(i.statut==='decline') statutBadge = '<span class="badge badge-declined">DÉCLINÉ</span>';
     else statutBadge = '<span class="badge badge-pending">EN ATTENTE</span>';
-    const notified = !!i.notifie;
+    const notified = !!i.relance_envoyee;
     const hasPhone = !!(i.telephone && i.telephone.trim());
     let actionCell;
     if(!hasPhone){
@@ -3881,7 +3888,7 @@ function renderNotifList(){
     } else {
       const btnClass = notified ? 'notif-btn notif-btn-red' : 'notif-btn notif-btn-green';
       const btnLabel = notified ? '✓ Notifié — Renvoyer' : '📱 Envoyer';
-      actionCell = `<button class="${btnClass}" onclick="sendNotification('${i.id}')">${btnLabel}</button>`;
+      actionCell = `<button class="${btnClass}" onclick="sendNotification('${i.id}')">${btnLabel}</button> <button class="notif-btn notif-btn-blue" onclick="sendNotificationSMS('${i.id}')">✉️ SMS</button>`;
     }
     const tableCell = `
       <input type="text" class="table-edit-input" data-id="${i.id}" value="${escapeHtml(i.table_nom||'')}" placeholder="—" onblur="saveTableEdit(this)" onkeydown="if(event.key==='Enter')this.blur()">
@@ -3910,11 +3917,30 @@ async function sendNotification(id){
   const msg = template.replace(/\{nom\}/g, firstName || guest.nom || '').replace(/\{lien\}/g, guestLink);
   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
   try{
-    await sbPatch('invites', `id=eq.${id}`, {notifie:true});
-    guest.notifie = true;
+    await sbPatch('invites', `id=eq.${id}`, {relance_envoyee:true});
+    guest.relance_envoyee = true;
     renderNotifList();
   } catch(e){
     console.error('[NOTIF] erreur maj statut', e);
+  }
+}
+
+async function sendNotificationSMS(id){
+  const guest = allInvites.find(i=>i.id===id);
+  if(!guest) return;
+  const phone = guest.telephone || '';
+  if(!phone){ toast('Aucun numéro pour cet invité'); return; }
+  const template = $('notif-message').value || '';
+  const firstName = (guest.nom || '').split(' ')[0];
+  const guestLink = `${window.location.origin}${window.location.pathname}?invite=${guest.code}`;
+  const msg = template.replace(/\{nom\}/g, firstName || guest.nom || '').replace(/\{lien\}/g, guestLink);
+  window.location.href = buildSmsUrl(phone, msg);
+  try{
+    await sbPatch('invites', `id=eq.${id}`, {relance_envoyee:true});
+    guest.relance_envoyee = true;
+    renderNotifList();
+  } catch(e){
+    console.error('[NOTIF SMS] erreur maj statut', e);
   }
 }
 
@@ -4124,6 +4150,32 @@ function shareWhatsApp(btnOrCode, maybeName, maybePhone){
   if(id) markNotified(id);
 }
 
+// Construit un lien sms: pré-rempli (ouvre l'appli Messages native, sans passer
+// par WhatsApp) — alternative utile quand WhatsApp restreint les nouveaux envois.
+function buildSmsUrl(phone, msg){
+  const digits = (phone || '').replace(/[^0-9+]/g, '');
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const sep = isIOS ? '&' : '?';
+  return `sms:${digits}${sep}body=${encodeURIComponent(msg)}`;
+}
+
+function shareSMS(btnOrCode, maybeName, maybePhone){
+  let code, name, phone, id;
+  if(btnOrCode instanceof HTMLElement){
+    code = btnOrCode.dataset.code;
+    name = btnOrCode.dataset.nom || '';
+    phone = btnOrCode.dataset.tel || '';
+    id = btnOrCode.dataset.id || '';
+  } else {
+    code = btnOrCode; name = maybeName || ''; phone = maybePhone || '';
+  }
+  if(!phone){ toast('Aucun numéro pour cet invité'); return; }
+  const link = `${window.location.origin}${window.location.pathname}?invite=${code}`;
+  const msg = `Bonjour ${name},\n\nVous êtes cordialement invité(e) au mariage civil de Maeva & Felix le 01 août 2026.\n\nVoici votre invitation personnelle :\n${link}\n\nMerci de confirmer votre présence. 🦚`;
+  window.location.href = buildSmsUrl(phone, msg);
+  if(id) markNotified(id);
+}
+
 function notifyTable(btn){
   // Notifie un invité déjà confirmé que sa table a été attribuée (ou modifiée),
   // et l'invite à retélécharger sa carte à jour. Pas de suivi persistant en
@@ -4137,6 +4189,17 @@ function notifyTable(btn){
   const digits = (phone || '').replace(/[^0-9]/g, '');
   const url = digits ? `https://wa.me/${digits}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
   window.open(url,'_blank');
+}
+
+function notifyTableSMS(btn){
+  const name = btn.dataset.nom || '';
+  const phone = btn.dataset.tel || '';
+  const table = (btn.dataset.table || '').toUpperCase();
+  const code = btn.dataset.code || '';
+  if(!phone){ toast('Aucun numéro pour cet invité'); return; }
+  const link = `${window.location.origin}${window.location.pathname}?invite=${code}`;
+  const msg = `Bonjour ${name},\n\nVotre table pour le mariage civil a été attribuée : ${table}.\n\nMerci de retélécharger votre carte d'invitation mise à jour via votre lien personnel :\n${link}\n\nÀ très bientôt ! 🦚`;
+  window.location.href = buildSmsUrl(phone, msg);
 }
 
 async function markNotified(id){
