@@ -4143,7 +4143,7 @@ function shareWhatsApp(btnOrCode, maybeName, maybePhone){
     code = btnOrCode; name = maybeName || ''; phone = maybePhone || '';
   }
   const link = `${window.location.origin}${window.location.pathname}?invite=${code}`;
-  const msg = `Bonjour ${name},\n\nVous êtes cordialement invité(e) au mariage civil de Maeva & Felix le 01 août 2026.\n\nVoici votre invitation personnelle :\n${link}\n\nMerci de confirmer votre présence. 🦚`;
+  const msg = `Bonjour ${name},\n\nVous êtes cordialement invité(e) au mariage civil de Maeva & Felix (Dr Kanga) le samedi 01 août 2026.\n\nVoici votre invitation personnelle :\n${link}\n\nMerci de confirmer votre présence en cliquant sur le lien.\n\nSi vous rencontrez des difficultés ou avez des questions, contactez ce numéro WhatsApp :\n+33 6 09 92 75 90\nhttps://wa.me/33609927590`;
   const digits = (phone || '').replace(/[^0-9]/g, '');
   const url = digits ? `https://wa.me/${digits}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
   window.open(url,'_blank');
@@ -4171,7 +4171,7 @@ function shareSMS(btnOrCode, maybeName, maybePhone){
   }
   if(!phone){ toast('Aucun numéro pour cet invité'); return; }
   const link = `${window.location.origin}${window.location.pathname}?invite=${code}`;
-  const msg = `Bonjour ${name},\n\nVous êtes cordialement invité(e) au mariage civil de Maeva & Felix le 01 août 2026.\n\nVoici votre invitation personnelle :\n${link}\n\nMerci de confirmer votre présence. 🦚`;
+  const msg = `Bonjour ${name},\n\nVous êtes cordialement invité(e) au mariage civil de Maeva & Felix (Dr Kanga) le samedi 01 août 2026.\n\nVoici votre invitation personnelle :\n${link}\n\nMerci de confirmer votre présence en cliquant sur le lien.\n\nSi vous rencontrez des difficultés ou avez des questions, contactez ce numéro WhatsApp :\n+33 6 09 92 75 90\nhttps://wa.me/33609927590`;
   window.location.href = buildSmsUrl(phone, msg);
   if(id) markNotified(id);
 }
