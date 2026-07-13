@@ -2455,7 +2455,7 @@ body.splash-on{overflow:hidden;height:100vh}
       <h3>Notifier les invités</h3>
       <div class="notif-msg-block">
         <label class="manual-code-label">Message (modifiable — {nom} = prénom de l'invité, {lien} = son lien personnel de confirmation)</label>
-        <textarea id="notif-message" rows="7">Bonjour {nom},
+        <textarea id="notif-message" rows="7">Bonjour Madame/Monsieur {nom},
 
 Nous finalisons le plan de table du mariage civil ! Merci de reconfirmer votre présence via votre lien personnel — vous pourrez ensuite télécharger votre carte d'invitation définitive (avec votre table) :
 {lien}
@@ -4158,7 +4158,7 @@ function shareWhatsApp(btnOrCode, maybeName, maybePhone){
     code = btnOrCode; name = maybeName || ''; phone = maybePhone || '';
   }
   const link = `${window.location.origin}${window.location.pathname}?invite=${code}`;
-  const msg = `Bonjour ${name},\n\nVous êtes cordialement invité(e) au mariage civil de Maeva & Felix (Dr Kanga) le samedi 01 août 2026.\n\nVoici votre invitation personnelle. Merci de confirmer votre présence en cliquant sur le lien ci-dessous :\n${link}\n\nSi vous rencontrez des difficultés ou avez des questions, contactez ce numéro WhatsApp en cliquant sur le lien ci-dessous :\n+33 6 09 92 75 90\nhttps://wa.me/33609927590`;
+  const msg = `Bonjour Madame/Monsieur ${name},\n\nVous êtes cordialement invité(e) au mariage civil de Maeva & Felix (Dr Kanga) le samedi 01 août 2026.\n\nVoici votre invitation personnelle. Merci de confirmer votre présence en cliquant sur le lien ci-dessous :\n${link}\n\nSi vous rencontrez des difficultés ou avez des questions, contactez ce numéro WhatsApp en cliquant sur le lien ci-dessous :\n+33 6 09 92 75 90\nhttps://wa.me/33609927590`;
   const digits = (phone || '').replace(/[^0-9]/g, '');
   const url = digits ? `https://wa.me/${digits}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
   window.open(url,'_blank');
@@ -4186,7 +4186,7 @@ function shareSMS(btnOrCode, maybeName, maybePhone){
   }
   if(!phone){ toast('Aucun numéro pour cet invité'); return; }
   const link = `${window.location.origin}${window.location.pathname}?invite=${code}`;
-  const msg = `Bonjour ${name},\n\nVous êtes cordialement invité(e) au mariage civil de Maeva & Felix (Dr Kanga) le samedi 01 août 2026.\n\nVoici votre invitation personnelle. Merci de confirmer votre présence en cliquant sur le lien ci-dessous :\n${link}\n\nSi vous rencontrez des difficultés ou avez des questions, contactez ce numéro WhatsApp en cliquant sur le lien ci-dessous :\n+33 6 09 92 75 90\nhttps://wa.me/33609927590`;
+  const msg = `Bonjour Madame/Monsieur ${name},\n\nVous êtes cordialement invité(e) au mariage civil de Maeva & Felix (Dr Kanga) le samedi 01 août 2026.\n\nVoici votre invitation personnelle. Merci de confirmer votre présence en cliquant sur le lien ci-dessous :\n${link}\n\nSi vous rencontrez des difficultés ou avez des questions, contactez ce numéro WhatsApp en cliquant sur le lien ci-dessous :\n+33 6 09 92 75 90\nhttps://wa.me/33609927590`;
   window.location.href = buildSmsUrl(phone, msg);
   if(id) markNotified(id, 'sms');
 }
@@ -4200,7 +4200,7 @@ function notifyTable(btn){
   const table = (btn.dataset.table || '').toUpperCase();
   const code = btn.dataset.code || '';
   const link = `${window.location.origin}${window.location.pathname}?invite=${code}`;
-  const msg = `Bonjour ${name},\n\nVotre table pour le mariage civil a été attribuée : ${table}.\n\nMerci de retélécharger votre carte d'invitation mise à jour via votre lien personnel :\n${link}\n\nÀ très bientôt ! 🦚`;
+  const msg = `Bonjour Madame/Monsieur ${name},\n\nVotre table pour le mariage civil a été attribuée : ${table}.\n\nMerci de retélécharger votre carte d'invitation mise à jour via votre lien personnel :\n${link}\n\nÀ très bientôt ! 🦚`;
   const digits = (phone || '').replace(/[^0-9]/g, '');
   const url = digits ? `https://wa.me/${digits}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
   window.open(url,'_blank');
@@ -4213,7 +4213,7 @@ function notifyTableSMS(btn){
   const code = btn.dataset.code || '';
   if(!phone){ toast('Aucun numéro pour cet invité'); return; }
   const link = `${window.location.origin}${window.location.pathname}?invite=${code}`;
-  const msg = `Bonjour ${name},\n\nVotre table pour le mariage civil a été attribuée : ${table}.\n\nMerci de retélécharger votre carte d'invitation mise à jour via votre lien personnel :\n${link}\n\nÀ très bientôt ! 🦚`;
+  const msg = `Bonjour Madame/Monsieur ${name},\n\nVotre table pour le mariage civil a été attribuée : ${table}.\n\nMerci de retélécharger votre carte d'invitation mise à jour via votre lien personnel :\n${link}\n\nÀ très bientôt ! 🦚`;
   window.location.href = buildSmsUrl(phone, msg);
 }
 
