@@ -3899,6 +3899,7 @@ function isPhoneValid(phone){
 // (donc injoignable sur WhatsApp/SMS même si le bouton a été cliqué), ou si
 // aucune notification (SMS/WhatsApp) n'a jamais été envoyée.
 function isNonNotifie(i){
+  if(i.statut === 'confirme') return false; // a déjà confirmé sa présence, exclu quel que soit le numéro
   const phone = i.telephone;
   if(!phone || !phone.trim()) return true;
   if(!isPhoneValid(phone)) return true;
