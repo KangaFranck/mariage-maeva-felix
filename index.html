@@ -2345,6 +2345,7 @@ body.splash-on{overflow:hidden;height:100vh}
       <div class="stat-card" id="stat-card-notifie_whatsapp" onclick="filterByStat('notifie_whatsapp')"><div class="stat-num" id="st-whatsapp">0</div><div class="stat-label">Invités WhatsApp</div></div>
       <div class="stat-card" id="stat-card-notifie_sms" onclick="filterByStat('notifie_sms')"><div class="stat-num" id="st-sms">0</div><div class="stat-label">Invités SMS</div></div>
       <div class="stat-card" id="stat-card-decline" onclick="filterByStat('decline')"><div class="stat-num" id="st-declined">0</div><div class="stat-label">Déclinés</div></div>
+      <div class="stat-card" id="stat-card-non_notifie" onclick="filterByStat('non_notifie')" style="border-color:rgba(224,122,95,.45)"><div class="stat-num" id="st-non-notifie" style="color:#E07A5F">0</div><div class="stat-label">Non notifiés</div></div>
     </div>
 
     <div class="org-tabs">
@@ -2393,6 +2394,8 @@ body.splash-on{overflow:hidden;height:100vh}
             <option value="351" data-min="9" data-max="9" data-name="Portugal">+351 PRT</option>
             <option value="31" data-min="9" data-max="9" data-name="Pays-Bas">+31 NLD</option>
             <option value="352" data-min="9" data-max="9" data-name="Luxembourg">+352 LUX</option>
+            <option value="1" data-min="10" data-max="10" data-name="Canada/USA">+1 CAN</option>
+            <option value="261" data-min="9" data-max="9" data-name="Madagascar">+261 MDG</option>
           </select>
           <input id="new-guest-phone" type="tel" inputmode="numeric" placeholder="Numéro" oninput="filterPhoneDigits(this)">
         </div>
@@ -3743,6 +3746,7 @@ async function loadDashboard(){
   $('st-whatsapp').textContent = invites.filter(i=>i.notifie_whatsapp).length;
   $('st-sms').textContent = invites.filter(i=>i.notifie_sms).length;
   $('st-declined').textContent = invites.filter(i=>i.statut==='decline').length;
+  $('st-non-notifie').textContent = invites.filter(isNonNotifie).length;
   filterGuests();
 }
 
@@ -3777,8 +3781,8 @@ function renderGuestsTable(invites){
         <td>${presBadge}</td>
         <td>
           ${i.code?`<button class="action-btn" onclick="copyLink('${i.code}')">📋 Lien</button>`:''}
-          ${i.code?`<button class="action-btn${i.notifie_whatsapp?' sent':''}" data-id="${i.id}" data-code="${i.code}" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" onclick="shareWhatsApp(this)">${i.notifie_whatsapp?'✓ Envoyé WhatsApp':'📱 WhatsApp'}</button>`:''}
-          ${i.code?`<button class="action-btn${i.notifie_sms?' sent':''}" data-id="${i.id}" data-code="${i.code}" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" onclick="shareSMS(this)">${i.notifie_sms?'✓ Envoyé SMS':'✉️ SMS'}</button>`:''}
+          ${i.code?`<button class="action-btn${(i.notifie_whatsapp && isPhoneValid(i.telephone))?' sent':''}" data-id="${i.id}" data-code="${i.code}" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" onclick="shareWhatsApp(this)">${(i.notifie_whatsapp && isPhoneValid(i.telephone))?'✓ Envoyé WhatsApp':'📱 WhatsApp'}</button>`:''}
+          ${i.code?`<button class="action-btn${(i.notifie_sms && isPhoneValid(i.telephone))?' sent':''}" data-id="${i.id}" data-code="${i.code}" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" onclick="shareSMS(this)">${(i.notifie_sms && isPhoneValid(i.telephone))?'✓ Envoyé SMS':'✉️ SMS'}</button>`:''}
           ${(i.statut==='confirme' && i.code && i.table_nom && i.table_nom.trim()) ? `<button class="action-btn" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" data-table="${escapeHtml(i.table_nom||'')}" data-code="${i.code}" onclick="notifyTable(this)">🍽️ Prévenir de sa table</button>` : ''}
           ${(i.statut==='confirme' && i.code && i.table_nom && i.table_nom.trim()) ? `<button class="action-btn" data-nom="${escapeHtml(i.nom||'')}" data-tel="${escapeHtml(i.telephone||'')}" data-table="${escapeHtml(i.table_nom||'')}" data-code="${i.code}" onclick="notifyTableSMS(this)">✉️ SMS table</button>` : ''}
           <button class="action-btn danger" data-id="${i.id}" data-nom="${escapeHtml(i.nom||'')}" onclick="deleteGuest(this)">Supprimer</button>
@@ -3800,6 +3804,7 @@ function filterGuests(){
   else if(quickFilter === 'notifie_whatsapp') list = list.filter(i=>i.notifie_whatsapp);
   else if(quickFilter === 'notifie_sms') list = list.filter(i=>i.notifie_sms);
   else if(quickFilter === 'decline') list = list.filter(i=>i.statut==='decline');
+  else if(quickFilter === 'non_notifie') list = list.filter(isNonNotifie);
   if(q){
     list = list.filter(i=>
       (i.nom||'').toLowerCase().includes(q) ||
@@ -3809,7 +3814,7 @@ function filterGuests(){
   renderGuestsTable(list);
 }
 
-const QUICK_FILTER_LABELS = { confirme:'Confirmés', en_attente:'En attente', entre:'Présents', reconfirme:'Reconfirmés', notifie_whatsapp:'Invités WhatsApp', notifie_sms:'Invités SMS', decline:'Déclinés' };
+const QUICK_FILTER_LABELS = { confirme:'Confirmés', en_attente:'En attente', entre:'Présents', reconfirme:'Reconfirmés', notifie_whatsapp:'Invités WhatsApp', notifie_sms:'Invités SMS', decline:'Déclinés', non_notifie:'Non notifiés (numéro manquant/invalide ou jamais notifié)' };
 
 function filterByStat(type){
   quickFilter = type;
@@ -3866,10 +3871,38 @@ const COUNTRY_CODES = [
   {c:'34',min:9,max:9,name:'Espagne',abbr:'ESP'},
   {c:'351',min:9,max:9,name:'Portugal',abbr:'PRT'},
   {c:'31',min:9,max:9,name:'Pays-Bas',abbr:'NLD'},
-  {c:'352',min:9,max:9,name:'Luxembourg',abbr:'LUX'}
+  {c:'352',min:9,max:9,name:'Luxembourg',abbr:'LUX'},
+  {c:'1',min:10,max:10,name:'Canada/USA',abbr:'CAN'},
+  {c:'261',min:9,max:9,name:'Madagascar',abbr:'MDG'}
 ];
 function countryOptionsHtml(){
   return COUNTRY_CODES.map(x=>`<option value="${x.c}" data-min="${x.min}" data-max="${x.max}" data-name="${x.name}" ${x.c==='225'?'selected':''}>+${x.c} ${x.abbr}</option>`).join('');
+}
+
+// Un numéro est valide s'il correspond, une fois les caractères non numériques
+// retirés, à un indicatif connu suivi du bon nombre de chiffres pour ce pays
+// (règle WhatsApp : ni trop court ni trop long pour l'indicatif détecté).
+function isPhoneValid(phone){
+  const digits = (phone || '').replace(/[^0-9]/g, '');
+  if(!digits) return false;
+  const byLongestCode = [...COUNTRY_CODES].sort((a,b)=>b.c.length-a.c.length);
+  for(const cc of byLongestCode){
+    if(digits.startsWith(cc.c)){
+      const rest = digits.length - cc.c.length;
+      return rest >= cc.min && rest <= cc.max;
+    }
+  }
+  return false; // indicatif non reconnu
+}
+
+// Considéré "non notifié" si : pas de numéro, numéro invalide pour son indicatif
+// (donc injoignable sur WhatsApp/SMS même si le bouton a été cliqué), ou si
+// aucune notification (SMS/WhatsApp) n'a jamais été envoyée.
+function isNonNotifie(i){
+  const phone = i.telephone;
+  if(!phone || !phone.trim()) return true;
+  if(!isPhoneValid(phone)) return true;
+  return !(i.notifie_sms || i.notifie_whatsapp);
 }
 
 function renderNotifList(){
@@ -4157,10 +4190,11 @@ function shareWhatsApp(btnOrCode, maybeName, maybePhone){
   } else {
     code = btnOrCode; name = maybeName || ''; phone = maybePhone || '';
   }
+  if(!phone){ toast('Aucun numéro pour cet invité'); return; }
   const link = `${window.location.origin}${window.location.pathname}?invite=${code}`;
   const msg = `Bonjour Madame/Monsieur ${name},\n\nVous êtes cordialement invité(e) au mariage civil de Maeva & Felix (Dr Kanga) le samedi 01 août 2026.\n\nVoici votre invitation personnelle. Merci de confirmer votre présence en cliquant sur le lien ci-dessous :\n${link}\n\nSi vous rencontrez des difficultés ou avez des questions, contactez ce numéro WhatsApp en cliquant sur le lien ci-dessous :\n+33 6 09 92 75 90\nhttps://wa.me/33609927590`;
-  const digits = (phone || '').replace(/[^0-9]/g, '');
-  const url = digits ? `https://wa.me/${digits}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  const digits = phone.replace(/[^0-9]/g, '');
+  const url = `https://wa.me/${digits}?text=${encodeURIComponent(msg)}`;
   window.open(url,'_blank');
   if(id) markNotified(id, 'whatsapp');
 }
