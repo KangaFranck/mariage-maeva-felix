@@ -3924,7 +3924,15 @@ function isPhoneValid(phone){
   for(const cc of byLongestCode){
     if(digits.startsWith(cc.c)){
       const rest = digits.length - cc.c.length;
-      return rest >= cc.min && rest <= cc.max;
+      if(rest < cc.min || rest > cc.max) return false;
+      // Côte d'Ivoire : depuis le plan de numérotation à 10 chiffres (2021),
+      // tout numéro local valide commence par 0 (0+indicatif opérateur+8 chiffres :
+      // 01/02/03 Moov, 04/05/06 MTN, 07/08/09 Orange). Un numéro +225 de 10 chiffres
+      // qui ne commence pas par 0 n'est donc pas un vrai numéro ivoirien.
+      if(cc.c === '225'){
+        return digits.slice(cc.c.length).startsWith('0');
+      }
+      return true;
     }
   }
   return false; // indicatif non reconnu
