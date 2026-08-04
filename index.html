@@ -4273,9 +4273,16 @@ function isIvorian(phone){
 }
 
 function buildSmsGroupUrl(numbers, msg){
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const sep = isIOS ? '&' : '?';
-  return `sms:${numbers.join(',')}${sep}body=${encodeURIComponent(msg)}`;
+  const ua = navigator.userAgent;
+  const isIOS = /iPad|iPhone|iPod/.test(ua);
+  const isAndroid = /Android/.test(ua);
+  // Séparateur des destinataires : iOS accepte la virgule, mais la plupart
+  // des apps SMS Android (Samsung Messages, etc.) n'ouvrent le champ
+  // destinataires correctement qu'avec des points-virgules — avec une virgule,
+  // le message se remplit mais les numéros restent vides.
+  const recipientSep = isAndroid ? ';' : ',';
+  const bodySep = isIOS ? '&' : '?';
+  return `sms:${numbers.join(recipientSep)}${bodySep}body=${encodeURIComponent(msg)}`;
 }
 
 // Découpe les numéros ivoiriens en lots pour l'envoi SMS groupé (une URL
