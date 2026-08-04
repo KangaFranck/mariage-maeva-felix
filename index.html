@@ -4272,6 +4272,18 @@ function isIvorian(phone){
   return digits.startsWith('225') && isPhoneValid(phone);
 }
 
+// Format local ivoirien (0XXXXXXXXX, sans "+225") : le signe "+" combiné à
+// une liste de destinataires séparés par une virgule/point-virgule fait
+// planter le parseur de destinataires de l'app Messages sur iOS (le message
+// se remplit mais le champ "À" reste avec un seul numéro, voire vide).
+// Comme ce numéro est déjà garanti ivoirien (isIvorian), on peut envoyer en
+// format national, qui fonctionne pour les SMS entre numéros du même pays.
+function toIvorianLocalNumber(phone){
+  let digits = (phone || '').replace(/[^0-9]/g, '');
+  if(digits.startsWith('225')) digits = digits.slice(3);
+  return digits;
+}
+
 function buildSmsGroupUrl(numbers, msg){
   const ua = navigator.userAgent;
   const isIOS = /iPad|iPhone|iPod/.test(ua);
@@ -4344,7 +4356,7 @@ function sendRemerciementSmsBatch(idx){
   const batch = remerciementBatches[idx];
   if(!batch || batch.length===0){ toast('Lot introuvable'); return; }
   const msg = buildRemerciementMessage();
-  const numbers = batch.map(i => (i.telephone||'').replace(/[^0-9+]/g,''));
+  const numbers = batch.map(i => toIvorianLocalNumber(i.telephone));
   window.location.href = buildSmsGroupUrl(numbers, msg);
 }
 
