@@ -2347,6 +2347,7 @@ body.splash-on{overflow:hidden;height:100vh}
       <div class="stat-card" id="stat-card-decline" onclick="filterByStat('decline')"><div class="stat-num" id="st-declined">0</div><div class="stat-label">Déclinés</div></div>
       <div class="stat-card" id="stat-card-non_notifie" onclick="filterByStat('non_notifie')" style="border-color:rgba(224,122,95,.45)"><div class="stat-num" id="st-non-notifie" style="color:#E07A5F">0</div><div class="stat-label">Non notifiés</div></div>
       <div class="stat-card" id="stat-card-a_relancer" onclick="filterByStat('a_relancer')" style="border-color:rgba(244,199,106,.45)" title="Notifiés (SMS/WhatsApp) mais toujours en attente : le clic ne prouve pas la réception, à recontacter par appel pour vérifier"><div class="stat-num" id="st-a-relancer" style="color:var(--gold)">0</div><div class="stat-label">Notifiés sans réponse — à vérifier</div></div>
+      <div class="stat-card" id="stat-card-notiftable" onclick="showTab('notiftable', null)" title="Notifier les invités confirmés, groupés par table"><div class="stat-num" id="st-notiftable-tables">0</div><div class="stat-label">Notifier Table</div></div>
       <div class="stat-card" id="stat-card-remerciement" onclick="showTab('remerciement', null)" title="Envoyer un message de remerciement aux invités confirmés"><div class="stat-num" id="st-remerciement-count">0</div><div class="stat-label">Remerciements</div></div>
     </div>
 
@@ -2476,6 +2477,32 @@ Nous avons hâte de vous voir ! 🌺</textarea>
           <tbody id="notif-tbody"></tbody>
         </table>
       </div>
+    </div>
+
+    <div id="tab-notiftable" class="org-panel hidden">
+      <h3>Notifier par table</h3>
+      <p style="color:rgba(255,255,255,.6);font-size:13px;margin-bottom:18px;line-height:1.6">
+        Un groupe par table (invités <strong style="color:var(--mint)">confirmés</strong> uniquement). Pour chaque table :
+        un bouton <strong>SMS groupé</strong> envoie un seul SMS à tous les numéros ivoiriens (+225) de la table ;
+        les invités sans numéro ivoirien sont listés à part et se notifient <strong>individuellement sur WhatsApp</strong>
+        (WhatsApp ne permet pas d'envoyer à plusieurs destinataires à la fois).
+      </p>
+      <div class="notif-msg-block">
+        <label class="manual-code-label">Message envoyé (modifiable — {table} = nom de la table)</label>
+        <textarea id="notiftable-message" rows="6">Bonjour à tous 🌺
+
+Cérémonie civile de Maeva &amp; Felix
+Samedi 1er août 2026 à 14h00
+Hôtel Le Palais d'Akwa — Salle Prestige, Bd Valéry Giscard d'Estaing, Abidjan
+
+Votre table : {table}
+
+À très bientôt !</textarea>
+      </div>
+      <div class="search-bar" style="margin-top:20px">
+        <input id="notiftable-search" type="text" placeholder="Rechercher une table…" oninput="renderNotifTableView()">
+      </div>
+      <div id="notiftable-grouped" style="margin-top:20px"></div>
     </div>
 
     <div id="tab-remerciement" class="org-panel hidden">
@@ -3750,13 +3777,14 @@ const SCAN_COOLDOWN_MS = 60000; // 60 secondes entre deux scans réussis
 function showTab(tab, btn){
   document.querySelectorAll('.org-tab').forEach(t=>t.classList.remove('active'));
   if(btn) btn.classList.add('active');
-  ['invites','tables','scanner','mouvements','notifications','remerciement','parametres'].forEach(t=>hide('tab-'+t));
+  ['invites','tables','scanner','mouvements','notifications','notiftable','remerciement','parametres'].forEach(t=>hide('tab-'+t));
   show('tab-'+tab);
   if(tab==='scanner') setScanMode('camera');
   else stopScanner();
   if(tab==='mouvements') loadMouvements();
   if(tab==='tables') renderTablesView();
   if(tab==='notifications') renderNotifList();
+  if(tab==='notiftable') renderNotifTableView();
   if(tab==='remerciement') renderRemerciementView();
   if(tab==='parametres'){
     // Reset form fields when entering settings
@@ -3780,6 +3808,8 @@ async function loadDashboard(){
   $('st-declined').textContent = invites.filter(i=>i.statut==='decline').length;
   $('st-non-notifie').textContent = invites.filter(isNonNotifie).length;
   $('st-a-relancer').textContent = invites.filter(isToRelance).length;
+  const tableSet = new Set(invites.filter(i=>i.statut==='confirme' && (i.table_nom||'').trim()).map(i=>i.table_nom.trim().toLowerCase()));
+  $('st-notiftable-tables').textContent = tableSet.size;
   $('st-remerciement-count').textContent = invites.filter(i=>i.statut==='confirme').length;
   filterGuests();
 }
@@ -4272,36 +4302,125 @@ function isIvorian(phone){
   return digits.startsWith('225') && isPhoneValid(phone);
 }
 
-// Format local ivoirien (0XXXXXXXXX, sans "+225") : le signe "+" combiné à
-// une liste de destinataires séparés par une virgule/point-virgule fait
-// planter le parseur de destinataires de l'app Messages sur iOS (le message
-// se remplit mais le champ "À" reste avec un seul numéro, voire vide).
-// Comme ce numéro est déjà garanti ivoirien (isIvorian), on peut envoyer en
-// format national, qui fonctionne pour les SMS entre numéros du même pays.
+// Numéro ivoirien en format international complet (+225XXXXXXXXXX). On garde
+// toujours le "+225" : un numéro en format local (sans indicatif) ne veut
+// rien dire pour un téléphone dont la carte SIM n'est pas ivoirienne
+// (ex: un envoi fait depuis la France) — seul le format international
+// fonctionne quel que soit le pays depuis lequel le SMS est envoyé.
 function toIvorianLocalNumber(phone){
   let digits = (phone || '').replace(/[^0-9]/g, '');
-  if(digits.startsWith('225')) digits = digits.slice(3);
-  return digits;
+  if(!digits.startsWith('225')) digits = '225' + digits.replace(/^0/, '');
+  return '+' + digits;
 }
 
 function buildSmsGroupUrl(numbers, msg){
   const ua = navigator.userAgent;
   const isIOS = /iPad|iPhone|iPod/.test(ua);
   const isAndroid = /Android/.test(ua);
-  // Séparateur des destinataires : iOS accepte la virgule, mais la plupart
-  // des apps SMS Android (Samsung Messages, etc.) n'ouvrent le champ
-  // destinataires correctement qu'avec des points-virgules — avec une virgule,
-  // le message se remplit mais les numéros restent vides.
+  const body = encodeURIComponent(msg);
+  if(isIOS){
+    // iOS n'implémente pas correctement le format standard (sms:num1,num2?body=...)
+    // pour les destinataires multiples : le champ "À" ne se remplit qu'avec un
+    // seul numéro, voire reste vide. Apple propose un schéma alternatif
+    // (non standard, mais c'est le seul qui fonctionne réellement sur iPhone).
+    return `sms://open?addresses=${numbers.join(',')}&body=${body}`;
+  }
+  // Android : la plupart des apps SMS (Samsung Messages, Google Messages...)
+  // exigent un point-virgule entre destinataires pour remplir le champ "À".
   const recipientSep = isAndroid ? ';' : ',';
-  const bodySep = isIOS ? '&' : '?';
-  return `sms:${numbers.join(recipientSep)}${bodySep}body=${encodeURIComponent(msg)}`;
+  return `sms:${numbers.join(recipientSep)}?body=${body}`;
 }
 
-// Découpe les numéros ivoiriens en lots pour l'envoi SMS groupé (une URL
-// sms: trop longue avec des centaines de destinataires est peu fiable selon
-// les téléphones/OS ; on limite donc chaque lot à 12 destinataires,
-// comme pour les groupes par table).
-const REMERCIEMENT_BATCH_SIZE = 12;
+function buildTableGroupMessage(tableLabel){
+  const tpl = $('notiftable-message')?.value || '';
+  return tpl.replace(/\{table\}/g, tableLabel);
+}
+
+function renderNotifTableView(){
+  const wrap = $('notiftable-grouped');
+  if(!wrap) return;
+  const q = ($('notiftable-search')?.value || '').trim().toLowerCase();
+
+  const confirmed = allInvites.filter(i => i.statut === 'confirme');
+  const withTable = confirmed.filter(i => (i.table_nom||'').trim());
+
+  const groups = {};
+  withTable.forEach(i=>{
+    const label = i.table_nom.trim();
+    const key = label.toLowerCase();
+    if(!groups[key]) groups[key] = { label, guests: [] };
+    groups[key].guests.push(i);
+  });
+
+  let entries = Object.values(groups);
+  if(q){
+    entries = entries.filter(g => g.label.toLowerCase().includes(q));
+  }
+  entries.sort((a,b)=> a.label.localeCompare(b.label, 'fr', {numeric:true}));
+
+  if(entries.length===0){
+    wrap.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,.5);font-style:italic;padding:30px">Aucune table attribuée pour le moment.</p>';
+    return;
+  }
+
+  wrap.innerHTML = entries.map(g => {
+    const ivoiriens = g.guests.filter(gu => isIvorian(gu.telephone));
+    const autres = g.guests.filter(gu => !isIvorian(gu.telephone));
+    const labelSafe = escapeHtml(g.label);
+    return `
+      <div class="table-group-card">
+        <div class="table-group-title">${labelSafe} <span class="table-group-count">${g.guests.length}</span></div>
+        <ul class="table-group-list">
+          ${g.guests.map(gu => `<li>${escapeHtml(gu.nom||'')}${!isIvorian(gu.telephone) ? ' <span style="color:var(--gold)">(hors CI)</span>' : ''}</li>`).join('')}
+        </ul>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:14px">
+          <button class="action-btn" data-table="${labelSafe}" ${ivoiriens.length===0?'disabled':''} onclick="sendGroupSmsForTable(this.dataset.table)">✉️ SMS groupé — ${ivoiriens.length} ivoirien(s)</button>
+        </div>
+        ${autres.length>0 ? `
+          <div style="margin-top:14px">
+            <div style="font-size:12px;color:rgba(255,255,255,.55);margin-bottom:8px">Hors Côte d'Ivoire — à notifier individuellement sur WhatsApp :</div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px">
+              ${autres.map(gu => `<button class="action-btn" data-id="${gu.id}" data-nom="${escapeHtml(gu.nom||'')}" data-tel="${escapeHtml(gu.telephone||'')}" data-table="${labelSafe}" onclick="sendIndividualTableWhatsApp(this)" ${!gu.telephone?'disabled title="Aucun numéro"':''}>📱 ${escapeHtml(gu.nom||'')}</button>`).join('')}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function sendGroupSmsForTable(tableLabel){
+  const confirmed = allInvites.filter(i => i.statut === 'confirme' && (i.table_nom||'').trim().toLowerCase() === tableLabel.toLowerCase());
+  const ivoiriens = confirmed.filter(i => isIvorian(i.telephone));
+  if(ivoiriens.length===0){ toast('Aucun numéro ivoirien pour cette table'); return; }
+  const msg = buildTableGroupMessage(tableLabel);
+  const numbers = ivoiriens.map(i => toIvorianLocalNumber(i.telephone));
+  window.location.href = buildSmsGroupUrl(numbers, msg);
+  ivoiriens.forEach(i => markNotified(i.id, 'sms'));
+}
+
+function sendIndividualTableWhatsApp(btn){
+  const name = btn.dataset.nom || '';
+  const phone = btn.dataset.tel || '';
+  const table = btn.dataset.table || '';
+  const id = btn.dataset.id || '';
+  if(!phone){ toast('Aucun numéro pour cet invité'); return; }
+  const msg = buildTableGroupMessage(table);
+  const digits = phone.replace(/[^0-9]/g,'');
+  window.open(`https://wa.me/${digits}?text=${encodeURIComponent(msg)}`,'_blank');
+  if(id) markNotified(id, 'whatsapp');
+}
+
+// Le message de remerciement n'est PAS regroupé par table (contrairement à
+// "Notifier Table") : tous les invités confirmés avec un numéro ivoirien sont
+// mis dans un seul pot commun, puis découpés en lots consécutifs. La taille
+// du lot est le maximum de destinataires qu'un SMS/MMS groupé accepte de
+// façon fiable chez les opérateurs ivoiriens (Orange/MTN/Moov acceptent en
+// pratique jusqu'à une vingtaine de destinataires par message groupé —
+// au-delà, l'envoi échoue ou certains ne reçoivent rien, quel que soit le lien
+// utilisé). Si le nombre total est inférieur à cette limite, un seul lot
+// couvre tout le monde ; sinon plusieurs lots sont créés automatiquement.
+const REMERCIEMENT_BATCH_SIZE = 20;
 let remerciementBatches = [];
 
 function buildRemerciementMessage(){
@@ -4324,7 +4443,8 @@ function renderRemerciementView(){
   let html = '';
 
   html += `<div class="table-group-card">
-    <div class="table-group-title">SMS groupé — invités avec un numéro ivoirien <span class="table-group-count">${ivoiriens.length}</span></div>`;
+    <div class="table-group-title">SMS groupé — invités avec un numéro ivoirien <span class="table-group-count">${ivoiriens.length}</span></div>
+    <p style="font-size:12px;color:rgba(255,255,255,.5);margin-top:6px">Chaque bouton ouvre l'app Messages avec les numéros et le message déjà remplis, il ne reste qu'à appuyer sur envoyer.</p>`;
   if(remerciementBatches.length === 0){
     html += `<p style="color:rgba(255,255,255,.55);font-style:italic;margin-top:10px">Aucun numéro ivoirien parmi les invités confirmés.</p>`;
   } else {
