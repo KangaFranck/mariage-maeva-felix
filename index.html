@@ -4299,8 +4299,9 @@ function buildSmsGroupUrl(numbers, msg){
 
 // Découpe les numéros ivoiriens en lots pour l'envoi SMS groupé (une URL
 // sms: trop longue avec des centaines de destinataires est peu fiable selon
-// les téléphones/OS ; on limite donc chaque lot à 40 destinataires).
-const REMERCIEMENT_BATCH_SIZE = 40;
+// les téléphones/OS ; on limite donc chaque lot à 12 destinataires,
+// comme pour les groupes par table).
+const REMERCIEMENT_BATCH_SIZE = 12;
 let remerciementBatches = [];
 
 function buildRemerciementMessage(){
